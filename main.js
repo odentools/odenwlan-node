@@ -130,7 +130,7 @@ app.on('ready', function() {
 		if (mAuth == null || isOnline == null || !isOnline || LOGIN_RETRY_COUNT_LIMIT <= loginRetryCount) {
 			// Change the status to offline
 			appTray.setImage(__dirname + '/img/icon_tray_offline.png');
-			if (loginRetryCount < LOGIN_RETRY_COUNT_LIMIT) { // Reached retry limit
+			if (LOGIN_RETRY_COUNT_LIMIT <= loginRetryCount) { // Reached retry limit
 				appTray.setToolTip('odenwlan-node : Reached retry limit');
 			} else {
 				appTray.setToolTip('odenwlan-node : Offline');
@@ -201,6 +201,8 @@ app.on('ready', function() {
 
 			} else {
 				console.log("Already logged-in :)");
+				// Clear a failed count
+				loginRetryCount = 0;
 				// Change the status to online
 				appTray.setImage(__dirname + '/img/icon_tray_online.png');
 				appTray.setToolTip('odenwlan-node : Online');
