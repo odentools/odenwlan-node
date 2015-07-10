@@ -1,0 +1,202 @@
+<html>
+<head>
+<title>無線LAN 利用者認証ページ</title>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">                                 
+<meta http-equiv="Cache-Control" content="no-cache">
+
+<script type="text/javascript">
+
+	/*GET引数を配列にするfunction 基本的に気にしなくていいです。*/
+	function getRequest(){
+	  if(location.search.length > 1) {
+	    var get = new Object();
+	    var ret = location.search.substr(1).split("&");
+	    for(var i = 0; i < ret.length; i++) {
+	      var r = ret[i].split("=");
+	      get[r[0]] = r[1];
+	    }
+	    return get;
+	  } else {
+	    return false;
+	  }
+	}
+	
+	/*URLに記載された?sip=hogehogeの文字列をformTagのactionに追記します。*/
+	function setFormAction(){
+		//function内でget引数を利用できるようにする。アクセス方法はget["キー名"]
+		get = getRequest();
+		var errmsg = "";
+		
+		//get["sip"]が取得できるか
+		if(get["sip"] != undefined){
+			if(get["sip"]=="172.25.250.91"){
+				//get["sip"]が取得できるとき、formのアクションに認証先を追記する。この時認証先が正しいかどうかは未検証
+				document.getElementById("formTag").action = "https://mcwlct1s.mc2ed.sjn.osakac.ac.jp:9998/login";
+			}else if(get["sip"]=="172.25.250.92"){
+				document.getElementById("formTag").action = "https://mcwlct2s.mc2ed.sjn.osakac.ac.jp:9998/login";
+			}else{
+				errmsg += "想定しないsipが入力されました。</br>"
+			}
+		}else{
+			//get["sip"]が取得できないとき = URLに認証コントローラが記載されていないとき、エラーメッセージを表示する。
+			errmsg += "引数がありません。<br>正しいURLでアクセスしてください。</br>";
+		}
+
+		//一般ユーザが認証に失敗したとき
+		if(get["auth"]=="failed"){
+			errmsg += "認証に失敗しました。</br>ユーザ名とパスワードを確認してください。</br>";
+		}
+		
+		//エラーメッセージを出力
+		document.getElementById("errorDisplay").innerHTML = errmsg;
+	}
+</script>
+
+<style type="text/css">
+	<!--
+	#container{
+		margin: 5px 10px;
+		}
+	#loginform{
+		float:left;
+		margin: 50px 30px 50px 0px;
+		}
+	#container-menu{
+		float:left;
+		width:600px;
+		}
+	#footter{
+		border-top: solid thin #999999;
+		padding-top: 5px;
+		clear:both;
+		font-size: 80%;
+		}
+	#floatlogo{
+		float: right;
+	}
+	#history {
+		font-size: 80%;
+	}
+	#indent {
+		padding-left: 20px;
+	}
+	div.attention{
+		margin: 10px 30px;
+		font-size: 120%;
+	}
+	body {
+		font-size: 90%;
+	}
+	span.bold{
+		font-weight: bold;
+	}
+		div.centering{
+			text-align:center;
+		}
+		p#errorDisplay{
+			color:red;
+		}
+	-->
+</style>
+
+</head>
+	<body onload="setFormAction();">
+
+		<div id=top>
+		<h1>四條畷キャンパス<br>無線LAN利用者認証ページ</h1>
+
+<!--
+			<div class=attention>
+			<span class=bold>お知らせ</span><br>
+			<ul>
+			<li> 認証で利用するユーザ名はMC2アカウント（oecuメールと同じもの）を利用してください。<br>
+			</ul>
+			</div>
+-->
+
+			<div class=attention>
+			無線LANを利用するためには認証が必要です。<br>
+			oecuメールを利用する際のユーザ名、パスワードを入力し「Login」ボタンをクリックしてください。<br>
+			</div>
+
+			<div id="container-inner">
+
+				<div id=loginform>
+					<h2>Login Page</h2>
+					<form id="formTag" method=POST>
+						<span>ユーザ名 : </span><input type="text"name="username"><br>
+						<span>パスワード : </span><input type="password"name="password" >
+						<input type="submit" value="Login">
+					</form>
+					<p id="errorDisplay"></p>
+					<img src="picture/osakac_logo.png">
+				</div>
+
+				<div id=container-menu>
+				
+					<div id=area>
+						<h2>無線LANの利用について</h2>
+						<div id=indent>
+							この画面が表示されている場合は問題なく無線LANに接続できています。<br>
+							（正しいSSIDと暗号通信用キーの設定ができています）<br>
+						</div>
+
+						<h2>利用可能な場所について</h2>
+						<div id=indent>
+							<h3>四條畷キャンパス</h3>
+							<div id=indent>
+								研究室・事務室内を除き、ほぼ全域で利用可能です。
+							</div>
+							<h3>寝屋川キャンパス・駅前キャンパス</h3>
+							<div id=indent>
+								利用できる場所が限られています。詳しくは
+								<a href="./neyagawa.html">こちら</a>
+							</div>
+						</div>
+					</div> <!-- area -->
+
+					<div id=misc>
+<!--
+						<h2>よくある質問</h2>
+						質問：ログインできましたが、その後正常に表示されません。
+						回答：手動でProxy設定がされている場合があります。Proxyの設定は<B>自動検出</B>の設定をお願いします。
+
+						質問：ログインするパスワードを忘れました。
+						回答：電話やメールでは応じかねますので、お手数ですが直接ＭＣ２事務室（四条畷キャンパス６号館１階）までお越しください。
+
+						質問：キャンパスが変わると再設定が必要ですか？
+						回答：ＭＣ２が運用している無線LANは異なるキャンパスでも同じ設定で利用できます。
+-->
+
+						<h2>利用上の注意</h2>
+						<ul>
+						<li>無線LANの利用の際は、節度ある利用をお願いします。
+						<li>メディアコミュニケーションセンター（ＭＣ２）ではキャンパス内無線LANの整備を行なっています。
+						四條畷キャンパス無線LANの利用方法についてのお問い合わせは下記までお願いします。
+							<ul>
+							<li>６号館１０６室 ＭＣ２事務室（内線：5055）
+							</ul>
+						<li>ネットワークのトラブルの連絡などは  mc2-info@mc2.osakac.ac.jp より受け付けています。
+						</ul>
+					</div>
+
+<!--
+					<div id=history>
+						更新履歴：
+						<ul>
+						<li>2013/01/08：新システム用ログインページ運用開始
+						<li>2013/10/31：構成の単純化，文言等の修正
+						</ul>
+					</div>
+-->
+				</div> <!-- container-menu -->
+				<div id=footter>
+					(C)2013 Media Communication Center, Osaka Electro-Communication University.
+				</div>
+			</div> <!-- container-inner -->
+		</div> <!-- container -->
+
+	</body>
+</html>
+

@@ -1,0 +1,19 @@
+{
+  "name": "odenwlan-node",
+  "version": "1.0.0",
+  "description": "An automatic login tool for Wi-Fi of OECU",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "OdenTools Project",
+  "license": "MIT",
+  "dependencies": {
+    "electron-prebuilt": "^0.29.2",
+    "request": "^2.58.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-electron": "^2.0.0"
+  }
+}

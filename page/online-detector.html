@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<script>
+			var ipc = require('ipc');
+			var updateOnlineStatus = function() {
+				ipc.send('online-status-changed', {
+					isOnline: navigator.onLine ? true : false
+				});
+			};
+
+			window.addEventListener('online',  updateOnlineStatus);
+			window.addEventListener('offline',  updateOnlineStatus);
+
+			updateOnlineStatus();
+		</script>
+	</head>
+	<body>
+		Worker browser
+	</body>
+</html>

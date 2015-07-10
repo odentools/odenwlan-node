@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<title>Preferences</title>
+		<style>
+			html, body, .container {
+				background-color: #fefefe;
+			}
+		</style>
+		<script>
+
+			/**
+				Read preferences
+			**/
+			function readPreferences() {
+				var login_id = localStorage.getItem('loginId');
+				var login_pw = localStorage.getItem('loginPw');
+				document.getElementById('loginId').value = login_id;
+				document.getElementById('loginPw').value = login_pw;
+			}
+
+			/**
+				Save preferences
+			**/
+			function savePreferences() {
+				var login_id = document.getElementById('loginId').value;
+				var login_pw = document.getElementById('loginPw').value;
+				if (login_id == null || login_pw == null) {
+					window.alert('Login ID or Password is empty!');
+					return;
+				}
+				localStorage.setItem('loginId', login_id);
+				localStorage.setItem('loginPw', login_pw);
+
+				sendPreferencesToMainProcess();
+
+				window.close();
+			}
+
+			/**
+				Send preferences to the main process
+				(This method calls when the main-process reads preferences)
+			**/
+			function sendPreferencesToMainProcess() {
+				var ipc = require('ipc');
+				ipc.send('fetch-preferences', {
+					loginId: localStorage.getItem('loginId'),
+					loginPw: localStorage.getItem('loginPw')
+				});
+			}
+
+			// On load
+			document.addEventListener("DOMContentLoaded", function(event) {
+				readPreferences();
+			});
+
+		</script>
+		<link rel="stylesheet" href="../css/bootstrap.min.css">
+	</head>
+	<body>
+		<div class="container">
+			<h1>Preferences</h1>
+			<form onsubmit="savePreferences(); return false;">
+				<div class="form-group">
+					<label for="loginId">User ID</label>
+					<input id="loginId" type="text" class="form-control" placeholder="mt15a000">
+				</div>
+				<div class="form-group">
+					<label for="loginPw">Password</label>
+					<input id="loginPw" type="password" class="form-control" placeholder="Password of MC2 account">
+				</div>
+				<button type="submit" class="btn btn-primary">Save</button>
+			</form>
+		</div>
+	</body>
+</html>
