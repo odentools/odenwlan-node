@@ -14,7 +14,7 @@ var BrowserWindow = require('browser-window');
 
 // Const values
 var STATUS_CHECK_INTERVAL = 2000; 			// Status checking works every 2 seconds
-var STATUS_CHECK_LOOP_TIMEOUT = 2 * 60000;	// 2 minutes after connection changed
+var STATUS_CHECK_LOOP_TIMEOUT = 1 * 60000;	// 1 minutes after connection changed
 var LOGIN_RETRY_COUNT_LIMIT = 5;			// Retry count limit for login
 
 // Instances
@@ -137,82 +137,106 @@ app.on('ready', function() {
 			}
 			return;
 
-		} else if (conChangedAt < now.getTime() - STATUS_CHECK_LOOP_TIMEOUT) {
+		} else if (conChangedAt == -1) {
 			return;
+
+		} else if (conChangedAt < now.getTime() - STATUS_CHECK_LOOP_TIMEOUT) {
+			// Change the status to offline
+			appTray.setImage(__dirname + '/img/icon_tray_offline.png');
+			appTray.setToolTip('odenwlan-node : Check loop was timeouted');
+			return;
+
 		}
 
-		if (is_processing) {
+		if (is_processing) { // If In progress
+			// Tray icon animation
+			var n = now.getSeconds() % 4;
+			if (n == 0 || n == 1) {
+				appTray.setImage(__dirname + '/img/icon_tray_wait_a.png');
+			} else {
+				appTray.setImage(__dirname + '/img/icon_tray_wait_b.png');
+			}
+
+			// Wait for progress
 			return;
 		}
 
 		// Status check
 		is_processing = true;
 		console.log('-- Checking for login status --');
-		appTray.setImage(__dirname + '/img/icon_tray_wait.png'); // Change the icon to waiting
-		mAuth.checkLoginStatus(function(login_status) {
-			console.log('Login status: ' + login_status);
+		appTray.setToolTip('odenwlan-node : Checking...');
+		appTray.setImage(__dirname + '/img/icon_tray_wait_a.png'); // Change the icon to waiting
+		try {
+			mAuth.checkLoginStatus(function(login_status) {
+				console.log('Login status: ' + login_status);
 
-			if (login_status == null) { // It may be connecting now
-				is_processing = false;
-				return;
-			}
+				if (login_status == null) { // It may be connecting now
+					is_processing = false;
+					return;
+				}
 
-			if (!login_status) {
-				// Login
-				console.log('-- Trying to login (' + loginRetryCount + ') --');
-				mAuth.login(function(is_successful, error_text) {
+				if (!login_status) {
+					// Login
+					console.log('-- Trying to login (' + loginRetryCount + ') --');
+					appTray.setToolTip('odenwlan-node : Trying to login...');
+					mAuth.login(function(is_successful, error_text) {
 
-					if (is_successful) { // Authentication was successful
-						// Clear a failed count
-						loginRetryCount = 0;
-						// Change the status to online
-						appTray.setImage(__dirname + '/img/icon_tray_online.png');
-						appTray.setToolTip('odenwlan-node : Online (Login was successful)');
+						if (is_successful) { // Authentication was successful
+							// Clear the retry count
+							loginRetryCount = 0;
+							// Change the status to online
+							appTray.setImage(__dirname + '/img/icon_tray_online.png');
+							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
 
-					} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
-						// Don't retry
-						loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
-						// Show a message
-						require('dialog').showMessageBox(null, {
-							type: 'info',
-							title: 'Authentication was failed',
-							message: "Authentication was failed.\nPlease check your MC2-account id and password.",
-							buttons: ['OK']
-						});
+						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
+							// Don't retry
+							loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
+							// Show a message
+							require('dialog').showMessageBox(null, {
+								type: 'info',
+								title: 'Authentication was failed',
+								message: "Authentication was failed.\nPlease check your MC2-account id and password.",
+								buttons: ['OK']
+							});
 
-					} else { // Other error (e.g. Network error)
-						// Increment the retry count
-						loginRetryCount++;
-						// Change the status to offline
-						appTray.setImage(__dirname + '/img/icon_tray_offline.png');
-						appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
-						// Show the error message
-						if (error_text != null) {
-							console.error('[ERROR] ' + error_text);
+						} else { // Other error (e.g. Network error)
+							// Increment the retry count
+							loginRetryCount++;
+							// Change the status to offline
+							appTray.setImage(__dirname + '/img/icon_tray_offline.png');
+							appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
+							// Show the error message
+							if (error_text != null) {
+								console.error('[ERROR] ' + error_text);
+							}
+
 						}
 
-					}
+						console.log('Login result: ' + is_successful);
+						// Processing was done
+						is_processing = false;
 
-					console.log('Login result: ' + is_successful);
+					});
+
+				} else {
+					console.log('Already logged-in :)');
+					// Clear a failed count
+					loginRetryCount = 0;
+					// Change the status to online
+					appTray.setImage(__dirname + '/img/icon_tray_online.png');
+					appTray.setToolTip('odenwlan-node : Online');
+					// Clear the connection changed time
+					conChangedAt = -1;
 					// Processing was done
 					is_processing = false;
 
-				});
+				}
+			});
 
-			} else {
-				console.log("Already logged-in :)");
-				// Clear a failed count
-				loginRetryCount = 0;
-				// Change the status to online
-				appTray.setImage(__dirname + '/img/icon_tray_online.png');
-				appTray.setToolTip('odenwlan-node : Online');
-				// Clear the connection changed time
-				conChangedAt = -1;
-				// Processing was done
-				is_processing = false;
-
-			}
-		});
+		} catch (e) {
+			console.log('[ERROR] ' + e);
+			is_processing = false;
+		};
 
 	}, STATUS_CHECK_INTERVAL);
 });

@@ -27,7 +27,7 @@
        inkscape:collect="always"
        id="linearGradient4286">
       <stop
-         style="stop-color:#85b70e;stop-opacity:1"
+         style="stop-color:#6f990c;stop-opacity:1"
          offset="0"
          id="stop4288" />
       <stop
@@ -66,8 +66,8 @@
        id="linearGradient4300"
        x1="232.3877"
        y1="356.98596"
-       x2="232.74219"
-       y2="399.0835"
+       x2="240.69553"
+       y2="401.93542"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.3286473,-2.6356803e-8,2.6356803e-8,1.3286473,-38.169259,390.09971)" />
   </defs>
@@ -79,7 +79,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.17815777"
-     inkscape:cx="-778.48488"
+     inkscape:cx="-977.74647"
      inkscape:cy="549.51274"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
