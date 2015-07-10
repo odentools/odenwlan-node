@@ -75,6 +75,11 @@ app.on('ready', function() {
 	]);
 	appTray.setContextMenu(contextMenu);
 	appTray.setToolTip('odenwlan-node');
+	appTray.on('clicked', function() {
+		// Reset variables in order to login immediately
+		conChangedAt = new Date().getTime();
+		loginRetryCount = 0;
+	});
 
 	// Check the current preferences
 	ipc.on('fetch-preferences', function(event, args) {
