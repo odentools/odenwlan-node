@@ -15,9 +15,9 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="icon_tray_offline.svg"
-   inkscape:export-filename="/home/masanori/Projects/odentools/odenwlan-node/img/icon_tray.png"
-   inkscape:export-xdpi="45"
-   inkscape:export-ydpi="45">
+   inkscape:export-filename="/home/masanori/Projects/odentools/odenwlan-node/img/icon_tray_offline.png"
+   inkscape:export-xdpi="5.6199999"
+   inkscape:export-ydpi="5.6199999">
   <title
      id="title4178">odenwlan-node tray icon</title>
   <defs
@@ -51,9 +51,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.71263106"
-     inkscape:cx="116.33987"
-     inkscape:cy="185.8238"
+     inkscape:zoom="0.25195313"
+     inkscape:cx="-452.71507"
+     inkscape:cy="205.40251"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -122,33 +122,42 @@
      transform="translate(-469.71429,-402.07648)"
      style="display:inline">
     <g
-       id="g3902"
-       transform="matrix(1.7334975,0,0,1.7334975,339.94227,325.75349)">
-      <rect
-         y="241.27795"
-         x="189.59084"
-         height="68.296082"
-         width="15"
-         id="rect3864"
-         style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#f2f2f2;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate" />
-      <rect
-         y="192.28296"
-         x="251.63809"
-         height="117.29108"
-         width="15"
-         id="rect3864-4"
-         style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#f2f2f2;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate" />
-      <rect
-         y="109.13991"
-         x="313.68546"
-         height="200.43413"
-         width="15"
-         id="rect3864-4-2"
-         style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#f2f2f2;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate" />
+       id="g4166"
+       style="display:inline;fill:#b5b5b5;fill-opacity:1"
+       transform="matrix(1.1090446,0,0,1.1090446,-99.199787,-94.039975)">
+      <g
+         style="fill:#b5b5b5;fill-opacity:1"
+         transform="matrix(1.7334975,0,0,1.7334975,339.94227,325.75349)"
+         id="g3902-3">
+        <rect
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#b5b5b5;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           id="rect3864-8"
+           width="20.80596"
+           height="68.296082"
+           x="189.59084"
+           y="241.27795" />
+        <rect
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#b5b5b5;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           id="rect3864-4-1"
+           width="20.80596"
+           height="117.29108"
+           x="251.63809"
+           y="192.28296" />
+        <rect
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#b5b5b5;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           id="rect3864-4-2-4"
+           width="20.80596"
+           height="200.43413"
+           x="313.68546"
+           y="109.13999" />
+      </g>
     </g>
+    <g
+       id="g3902"
+       transform="matrix(1.7334975,0,0,1.7334975,339.94227,325.75349)" />
     <text
        xml:space="preserve"
-       style="font-size:382.13867188px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;opacity:0.8;fill:#636363;fill-opacity:1;stroke:none;font-family:'M+ 2c';-inkscape-font-specification:'M+ 2c Ultra-Light';"
+       style="font-size:382.13867188px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;opacity:0.8;fill:#323232;fill-opacity:1;stroke:none;font-family:'M+ 2c';-inkscape-font-specification:'M+ 2c Ultra-Light';"
        x="395.99887"
        y="658.15399"
        id="text3959"

@@ -17,8 +17,8 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="icon_tray_wait.svg"
    inkscape:export-filename="/home/masanori/Projects/odentools/odenwlan-node/img/icon_tray_wait.png"
-   inkscape:export-xdpi="45"
-   inkscape:export-ydpi="45">
+   inkscape:export-xdpi="5.6199999"
+   inkscape:export-ydpi="5.6199999">
   <title
      id="title4178">odenwlan-node tray icon</title>
   <defs
@@ -69,7 +69,7 @@
        x2="232.74219"
        y2="399.0835"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.77478257,-1.2564041e-8,1.2564041e-8,0.77478257,215.63647,691.32636)" />
+       gradientTransform="matrix(1.3286473,-2.6356803e-8,2.6356803e-8,1.3286473,-38.169259,390.09971)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -78,9 +78,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35631553"
-     inkscape:cx="66.197464"
-     inkscape:cy="120.36286"
+     inkscape:zoom="0.17815777"
+     inkscape:cx="-778.48488"
+     inkscape:cy="549.51274"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -110,12 +110,12 @@
             <dc:title>Masanori Ohgita</dc:title>
           </cc:Agent>
         </dc:creator>
-        <dc:language></dc:language>
+        <dc:language />
         <cc:license
            rdf:resource="https://github.com/odentools/oden_wlan_android/blob/master/LICENSE.txt" />
-        <dc:identifier></dc:identifier>
-        <dc:source></dc:source>
-        <dc:relation></dc:relation>
+        <dc:identifier />
+        <dc:source />
+        <dc:relation />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -148,24 +148,12 @@
      id="layer1"
      transform="translate(-469.71429,-402.07648)"
      style="display:inline">
-    <text
-       xml:space="preserve"
-       style="font-size:382.13867188px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;opacity:0.8;fill:#85b70e;fill-opacity:1;stroke:none;font-family:'M+ 2c';-inkscape-font-specification:'M+ 2c Ultra-Light'"
-       x="395.99887"
-       y="658.15399"
-       id="text3959"
-       sodipodi:linespacing="125%"
-       clip-path="url(#clipPath4025)"><tspan
-         sodipodi:role="line"
-         id="tspan3961"
-         x="395.99887"
-         y="658.15399">W</tspan></text>
     <circle
-       style="fill:none;fill-opacity:1;stroke:url(#linearGradient4300);stroke-width:15.4956522;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient4300);stroke-width:26.57294846;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4284"
-       cx="506.71964"
-       cy="967.91431"
-       r="103.28535"
+       cx="460.99899"
+       cy="864.41071"
+       r="177.12041"
        transform="matrix(0.94131241,-0.33753658,0.33753658,0.94131241,0,0)" />
   </g>
 </svg>

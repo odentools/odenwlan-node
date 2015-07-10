@@ -16,8 +16,8 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="icon_tray_online.svg"
    inkscape:export-filename="/home/masanori/Projects/odentools/odenwlan-node/img/icon_tray_online.png"
-   inkscape:export-xdpi="45"
-   inkscape:export-ydpi="45">
+   inkscape:export-xdpi="5.6199999"
+   inkscape:export-ydpi="5.6199999">
   <title
      id="title4178">odenwlan-node tray icon</title>
   <defs
@@ -37,15 +37,15 @@
     <filter
        inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
-       id="filter4200"
-       x="-0.036000001"
-       width="1.072"
-       y="-0.035999999"
-       height="1.072">
+       id="filter4749"
+       x="-0.057600003"
+       width="1.1152"
+       y="-0.057599999"
+       height="1.1152">
       <feGaussianBlur
          inkscape:collect="always"
-         stdDeviation="7.0810348"
-         id="feGaussianBlur4202" />
+         stdDeviation="11.329656"
+         id="feGaussianBlur4751" />
     </filter>
   </defs>
   <sodipodi:namedview
@@ -55,11 +55,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35631554"
-     inkscape:cx="-56.126366"
-     inkscape:cy="161.3965"
+     inkscape:zoom="0.50390627"
+     inkscape:cx="134.87579"
+     inkscape:cy="165.61091"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -102,21 +102,20 @@
      inkscape:label="Background"
      style="display:inline">
     <rect
-       style="color:#000000;fill:#85b70e;fill-opacity:1;stroke:none;stroke-width:7.93101263;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4200)"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:0.872;fill:#b4ef29;fill-opacity:1;stroke:none;stroke-width:7.93101263;marker:none;filter:url(#filter4749);enable-background:accumulate"
        id="rect2996-2"
        width="472.06897"
        height="472.069"
-       x="19.965515"
-       y="19.965515"
-       ry="34.099998"
-       transform="translate(4.4335937e-6,0)" />
+       x="19.965519"
+       y="19.965513"
+       ry="34.099998" />
     <rect
-       style="color:#000000;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:7.93101263;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#c0f351;fill-opacity:1;stroke:none;stroke-width:7.93101263;marker:none;enable-background:accumulate"
        id="rect2996"
        width="472.06897"
        height="472.069"
        x="19.965519"
-       y="19.965515"
+       y="19.965521"
        ry="34.099998" />
   </g>
   <g
@@ -127,37 +126,38 @@
      style="display:inline">
     <g
        id="g4166"
-       style="fill:#a8ea11;fill-opacity:1">
+       style="fill:#ffffff;fill-opacity:1"
+       transform="matrix(1.1090446,0,0,1.1090446,-99.19979,-94.039977)">
       <g
-         style="fill:#a8ea11;fill-opacity:1"
+         style="fill:#ffffff;fill-opacity:1"
          transform="matrix(1.7334975,0,0,1.7334975,339.94227,325.75349)"
          id="g3902">
         <rect
-           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#a8ea11;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
            id="rect3864"
-           width="15"
+           width="20.80596"
            height="68.296082"
            x="189.59084"
            y="241.27795" />
         <rect
-           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#a8ea11;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
            id="rect3864-4"
-           width="15"
+           width="20.80596"
            height="117.29108"
            x="251.63809"
            y="192.28296" />
         <rect
-           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#a8ea11;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6;marker:none;enable-background:accumulate"
            id="rect3864-4-2"
-           width="15"
+           width="20.80596"
            height="200.43413"
            x="313.68546"
-           y="109.13991" />
+           y="109.13999" />
       </g>
     </g>
     <text
        xml:space="preserve"
-       style="font-size:382.13867188px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;opacity:0.8;fill:#85b70e;fill-opacity:1;stroke:none;font-family:'M+ 2c';-inkscape-font-specification:'M+ 2c Ultra-Light'"
+       style="font-size:382.13867188px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;opacity:1;fill:#4b6a08;fill-opacity:1;stroke:none;font-family:'M+ 2c';-inkscape-font-specification:'M+ 2c Ultra-Light';"
        x="395.99887"
        y="658.15399"
        id="text3959"
