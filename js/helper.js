@@ -1,8 +1,12 @@
 var BrowserWindow = require('browser-window');
+var request = require('request');
 
 module.exports = {
 
-	// Initialize the hidden window for worker
+	/**
+		Initialize the hidden window for worker
+		@param browser_windows	Associative array of BrowserWindow
+	**/
 	initWorkerBrowser: function(browser_windows) {
 		if (browser_windows.worker != null) {
 			return;
@@ -17,7 +21,10 @@ module.exports = {
 		browser_windows.worker.loadUrl('file://' + __dirname + '/../page/online-detector.html');
 	},
 
-	// Initialize the about window
+	/**
+		Initialize the about window
+		@param browser_windows	Associative array of BrowserWindow
+	**/
 	initAboutWindow: function(browser_windows) {
 		if (browser_windows.about != null) {
 			browser_windows.about.loadUrl('file://' + __dirname + '/../page/about.html');
@@ -37,13 +44,19 @@ module.exports = {
 		browser_windows.about.loadUrl('file://' + __dirname + '/../page/about.html');
 	},
 
-	// Show the about window
+	/**
+		Show the about window
+		@param browser_windows	Associative array of BrowserWindow
+	**/
 	showAboutWindow: function(browser_windows) {
 		this.initAboutWindow(browser_windows);
 		browser_windows.about.show();
 	},
 
-	// Initialize the preferences window
+	/**
+		Initialize the preferences window
+		@param browser_windows	Associative array of BrowserWindow
+	**/
 	initPrefWindow: function(browser_windows) {
 		if (browser_windows.pref != null) {
 			browser_windows.pref.loadUrl('file://' + __dirname + '/../page/preferences.html');
@@ -63,7 +76,10 @@ module.exports = {
 		browser_windows.pref.loadUrl('file://' + __dirname + '/../page/preferences.html');
 	},
 
-	// Show the preferences window
+	/**
+		Show the preferences window
+		@param browser_windows	Associative array of BrowserWindow
+	**/
 	showPrefWindow: function(browser_windows) {
 		this.initPrefWindow(browser_windows);
 		browser_windows.pref.show();
