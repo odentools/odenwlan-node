@@ -14,8 +14,8 @@ var BrowserWindow = require('browser-window');
 
 // Const values
 var STATUS_CHECK_INTERVAL = 2000; 			// Status checking works every 2 seconds
-var STATUS_CHECK_LOOP_TIMEOUT = 1 * 60000;	// 1 minutes after connection changed
-var LOGIN_RETRY_COUNT_LIMIT = 5;			// Retry count limit for login
+var STATUS_CHECK_LOOP_TIMEOUT = 60000;		// 1 minutes after connection changed
+var LOGIN_RETRY_COUNT_LIMIT = 8;			// Retry count limit for login
 
 // Instances
 var ipc = require('ipc'); 		// IPC module

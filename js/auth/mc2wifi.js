@@ -34,8 +34,8 @@ Client.prototype.login = function(callback) {
 
 	// 1st request - GET for redirect to authentication-page
 	var url = 'http://osakac.ac.jp/';
-	this._dlog('login - GET: ' + url);
-	http.get(url, function (res) { // When the 1st request was completed
+	client._dlog('login - GET: ' + url);
+	var req = http.get(url, function (res) { // When the 1st request was completed
 		if (res.statusCode == 301 || res.statusCode == 302) { // Redirect
 			var redirect_url = res.headers.location;
 
@@ -50,6 +50,10 @@ Client.prototype.login = function(callback) {
 
 		}
 
+	});
+	req.on('error', function(err) { // Error handling for internal error (g.g, dns error)
+		client._dlog('login - Internal error occured: ' + err);
+		callback(false, '1st request was failed');
 	});
 };
 
