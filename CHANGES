@@ -1,5 +1,8 @@
 # Change log of odenwlan-node
 
+## v1.1.2
+* Fixed a malfunction in dns lookup of the request module
+
 ## v1.1.1
 * Fixed an uncatchable error about dns lookup
 

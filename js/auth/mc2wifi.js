@@ -13,6 +13,9 @@ var Client = function(options) {
 	this.httpProxy = 'http://172.25.250.41:8080/';
 	this.httpsProxy = 'http://172.25.250.41:8080/';
 
+	// WAN connection check url
+	this.wanOnlineCheckUrl = 'https://odentools.github.io/';
+
 	// Certificate files
 	this.isCertCheck = false;
 	this.certFiles = [
@@ -89,7 +92,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 
 	// 2nd request - POST for authentication with validation by certificate
 	self._dlog('login - POST: ' + base_url + '/login');
-	var request = require('request');
+	var request = self._getRequestModule();
 	request.post({
 		'url': base_url + '/login',
 		'ca': cert,
@@ -148,7 +151,7 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 	}
 
 	// Request
-	var request = require('request');
+	var request = self._getRequestModule();
 	self._dlog('_requestRedirectLoop - GET(' + count + '): ' + url);
 	request.get({
 		'url': url,
@@ -237,11 +240,11 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 Client.prototype.checkLoginStatus = function(callback) {
 	var self = this;
 
-	var request = require('request');
+	var request = self._getRequestModule();
 	var now = new Date().getTime();
 
 	// Access to WAN
-	request('http://oden.oecu.jp/?client=odenwlan&t=' + now, function(err, res, body) {
+	request(self.wanOnlineCheckUrl + '?client=odenwlan&t=' + now, function(err, res, body) {
 		if (!err && res.statusCode == 200) {
 			if (body.match(/無線LAN 利用者確認ページ/)) {
 				callback(false); // Not logged-in
@@ -260,6 +263,16 @@ Client.prototype.checkLoginStatus = function(callback) {
 			});
 		}
 	});
+};
+
+/**
+	Get a new instance of the request module
+**/
+Client.prototype._getRequestModule = function(str) {
+	// Clear a cache of the request module
+	delete require.cache[require.resolve('request')];
+	// Return a new instance
+	return require('request');
 };
 
 /**
