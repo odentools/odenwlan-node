@@ -18,7 +18,7 @@ Executable binaries for Windows and Linux can be found on the [releases](https:/
 
 An result of automated testing for master branch:
 
-[![Build Status](https://travis-ci.org/odentools/vm-signage.svg?branch=oc-sjn)](https://travis-ci.org/odentools/vm-signage)
+[![Build Status](https://travis-ci.org/odentools/odenwlan-node.svg?branch=master)](https://travis-ci.org/odentools/odenwlan-node)
 
 ## How to build
 
