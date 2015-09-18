@@ -37,13 +37,20 @@ module.exports = function(grunt) {
 					'version-string.FileVersion': '<%= grunt.template.today("yyyymmdd") %>'
 				}
 			}
+		},
+
+		// grunt-eslint
+		eslint: {
+			target: '.'
 		}
 	});
 
 	// Load tasks
 	grunt.loadNpmTasks('grunt-electron');
+	grunt.loadNpmTasks('grunt-eslint');
 
 	// Register tasks
-	grunt.registerTask('default', ['electron']);
+	grunt.registerTask('test', ['eslint']);
+	grunt.registerTask('default', ['test', 'electron']);
 
 };

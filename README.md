@@ -14,31 +14,52 @@ Would you try it now?
 
 Executable binaries for Windows and Linux can be found on the [releases](https://github.com/odentools/odenwlan-node/releases) page.
 
-# How to develop
+# For developers
+
+An result of automated testing for master branch:
+
+[![Build Status](https://travis-ci.org/odentools/vm-signage.svg?branch=oc-sjn)](https://travis-ci.org/odentools/vm-signage)
+
+## How to build
 
 Recommend environment:
 
 * GNU/Linux
 
-Required enrivonment:
+Required software:
 
-* Node.js v0.12.5 or later
+* Node.js v0.12 or compatible version
 
-Firstly, please run the following commands on your terminal.
+Please run the following commands on your terminal.
 
 	$ git clone git@github.com:odentools/odenwlan-node.git
 	$ cd odenwlan-node/
 	$ npm install
 
-By these steps, preparation of development was completed.
+Now you can develop it. enjoy!
 
-Now you can running the app by the **npm start** command.
+## Available commands
+
+**Install the dependency libraries:**
+
+	$ npm install
+
+**Run the app:**
 
 	$ npm start
 
-And the **grunt** command allows make a distribution package for some platforms.
+**Run the test:**
+
+	$ npm test
+
+In current version, it executes only syntax check by ESLint.
+Also "grunt test" command also run the same.
+
+**Make a distribution package for some platforms:**
 
 	$ grunt
+
+In current version, it makes package for Linux and Windows.
 
 # License
 
