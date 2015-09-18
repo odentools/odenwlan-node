@@ -34,7 +34,7 @@ module.exports = function(grunt) {
 					'version-string.ProductName': 'odenwlan-node',
 					'version-string.ProductVersion': '<%= pkg.version %>',
 					'version-string.FileDescription': '<%= pkg.description %>',
-					'version-string.FileVersion': '<%= grunt.template.today("yyyymmdd") %>',
+					'version-string.FileVersion': '<%= grunt.template.today("yyyymmdd") %>'
 				}
 			}
 		}

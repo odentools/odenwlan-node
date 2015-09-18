@@ -89,7 +89,7 @@ app.on('ready', function() {
 			require('dialog').showMessageBox(null, {
 				type: 'info',
 				title: 'Welcome to odenwlan-node',
-				message: "Thanks for installing :)\nPlease input your MC2-account id and password.",
+				message: 'Thanks for installing :)\nPlease input your MC2-account id and password.',
 				buttons: ['OK']
 			});
 			mHelper.showPrefWindow(browserWindows);
@@ -200,7 +200,7 @@ app.on('ready', function() {
 							require('dialog').showMessageBox(null, {
 								type: 'info',
 								title: 'Authentication was failed',
-								message: "Authentication was failed.\nPlease check your MC2-account id and password.",
+								message: 'Authentication was failed.\nPlease check your MC2-account id and password.',
 								buttons: ['OK']
 							});
 
@@ -241,7 +241,7 @@ app.on('ready', function() {
 		} catch (e) {
 			console.log('[ERROR] ' + e);
 			is_processing = false;
-		};
+		}
 
 	}, STATUS_CHECK_INTERVAL);
 });

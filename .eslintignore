@@ -1,0 +1,10 @@
+# node_modules directory is ignored by default
+
+# Generated distribution directory
+dist/
+
+# Resource directories
+cert/
+css/
+img/
+page/

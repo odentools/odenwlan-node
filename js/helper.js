@@ -1,5 +1,4 @@
 var BrowserWindow = require('browser-window');
-var request = require('request');
 
 module.exports = {
 

@@ -13,8 +13,8 @@ var Client = function(options) {
 	this.httpProxy = 'http://172.25.250.41:8080/';
 	this.httpsProxy = 'http://172.25.250.41:8080/';
 
-	// WAN connection check url
-	this.wanOnlineCheckUrl = 'https://odentools.github.io/';
+	// WAN connection check url (It must be HTTP page; Don't to HTTPS)
+	this.wanOnlineCheckUrl = 'http://odentools.github.io/';
 
 	// Certificate files
 	this.isCertCheck = false;
@@ -106,8 +106,10 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 		}
 	}, function(err, res, body) { // When the 2st request was completed
 
+		var redirect_url = null;
+
 		if (!err && (res.statusCode == 301 || res.statusCode == 302)) { // HTTP Redirect
-			var redirect_url = res.headers.location;
+			redirect_url = res.headers.location;
 			self._dlog('login - Detect HTTP Redirect: ' + redirect_url);
 
 			// Go to 3rd request - Redirect-loop after authentication
@@ -117,7 +119,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 			// Processing included resources
 			self._requestIncludeResources(body, base_url);
 			// Processing JavaScript code
-			var redirect_url = self._getJsRedirectUrl(body, base_url);
+			redirect_url = self._getJsRedirectUrl(body, base_url);
 			if (redirect_url != null) {
 				// Go to 3rd request - Redirect-loop after authentication
 				self._requestRedirectLoop(redirect_url, base_url, callback, 0);
@@ -213,7 +215,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 
 	var request = require('request');
 	request.get(img_url);
-}
+};
 
 /**
 	Get a JavaScript Redirect URL from body content

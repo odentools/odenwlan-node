@@ -4,7 +4,8 @@
   "description": "An automatic login tool for Wi-Fi of OECU",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pretest": "eslint ."
   },
   "author": "OdenTools Project",
   "license": "MIT",
@@ -20,6 +21,7 @@
     "request": "^2.58.0"
   },
   "devDependencies": {
+    "eslint": "^1.4.3",
     "grunt": "^0.4.5",
     "grunt-electron": "^2.0.0"
   }
