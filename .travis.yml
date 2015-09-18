@@ -1,7 +1,9 @@
+# CI settings for Travis-CI
+# (Don't write hard tab in this file)
 language: node_js
 node_js:
-	- "0.12"
+    - "0.12"
 install:
-	- npm install
+    - npm install
 script:
-	- npm test
+    - npm test
