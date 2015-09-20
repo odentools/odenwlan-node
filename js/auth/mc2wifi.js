@@ -1,8 +1,10 @@
 var path = require('path');
 
 /**
-	Client object
-**/
+ * Authentication client module for MC2Wifi and MC2Phone
+ * @param  {Object} options Options for module
+ * @return {Object}         Instance
+ */
 var Client = function(options) {
 
 	// Read options
@@ -16,16 +18,20 @@ var Client = function(options) {
 	// WAN connection check url (It must be HTTP page; Don't to HTTPS)
 	this.wanOnlineCheckUrl = 'http://odentools.github.io/';
 
-	// Certificate files
+	// User-Agent string
+	this.userAgent = options.userAgent || 'odenwlan-node';
+
+	// Certificate files for login processing
 	this.isCertCheck = false;
 	this.certFiles = [
 		'file://' + __dirname + '/../../cert/mcwlct1s.mc2ed.sjn.osakac.ac.jp.pem'
 	];
 
-	// Debug module
+	// Debug mode
 	this.isDebug = true;
 
 };
+
 
 /**
 	Login to the network
@@ -59,6 +65,7 @@ Client.prototype.login = function(callback) {
 		callback(false, '1st request was failed');
 	});
 };
+
 
 /**
 	2nd request for login
@@ -136,6 +143,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 
 };
 
+
 /**
 	Processing for redirect-loops (includes HTTP & JavaScript Redirect)
 	@param url Request URL
@@ -188,6 +196,7 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 	});
 };
 
+
 /**
 	Processing for included resources (such as IMG tag for Web beacon)
 	@param body Response Body (HTML code)
@@ -217,6 +226,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 	request.get(img_url);
 };
 
+
 /**
 	Get a JavaScript Redirect URL from body content
 	@param body Response Body
@@ -234,6 +244,7 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 	return redirect_url;
 };
 
+
 /**
 	Check whether the user is logged-in
 	@param callback	Callback function: function(is_logged_in)
@@ -246,7 +257,13 @@ Client.prototype.checkLoginStatus = function(callback) {
 	var now = new Date().getTime();
 
 	// Access to WAN
-	request(self.wanOnlineCheckUrl + '?client=odenwlan&t=' + now, function(err, res, body) {
+	var req = {
+		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
+		headers: {
+			'User-Agent': self.userAgent
+		}
+	};
+	request(req, function(err, res, body) {
 		if (!err && res.statusCode == 200) {
 			if (body.match(/無線LAN 利用者確認ページ/)) {
 				callback(false); // Not logged-in
@@ -267,6 +284,7 @@ Client.prototype.checkLoginStatus = function(callback) {
 	});
 };
 
+
 /**
 	Get a new instance of the request module
 **/
@@ -277,6 +295,7 @@ Client.prototype._getRequestModule = function(str) {
 	return require('request');
 };
 
+
 /**
 	Output of debugging log
 **/
@@ -285,5 +304,8 @@ Client.prototype._dlog = function(str) {
 		console.log('' + str);
 	}
 };
+
+
+/* ---- */
 
 module.exports = Client;

@@ -4,7 +4,7 @@
   "description": "An automatic login tool for Wi-Fi of OECU",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron . --env=development",
     "test": "node_modules/grunt-cli/bin/grunt test"
   },
   "author": "OdenTools Project",
@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "electron-prebuilt": "^0.29.2",
+    "electron-updater-gh-releases": "git://github.com/mugifly/electron-updater-gh-releases",
     "request": "^2.58.0"
   },
   "devDependencies": {

@@ -1,5 +1,8 @@
 var BrowserWindow = require('browser-window');
 
+/**
+ * An helper which include static methods
+ */
 module.exports = {
 
 	/**
@@ -82,5 +85,63 @@ module.exports = {
 	showPrefWindow: function(browser_windows) {
 		this.initPrefWindow(browser_windows);
 		browser_windows.pref.show();
+	},
+
+	/**
+		Save a value to preference (localStorage)
+		@param browser_windows	Associative array of BrowserWindow
+		@param key		Key of item
+		@param value 	Value of item
+	**/
+	savePref: function(browser_windows, key, value) {
+		var self = this;
+
+		if (browser_windows.pref == null) {
+			console.log('[WARN] Helper - savePref - browser_windows.pref is null!');
+			return;
+		}
+
+		if (self.objectTypeIs(value, 'Number')) {
+			browser_windows.pref.webContents.executeJavaScript('savePreference(\"' + key + '\", ' + value + ', true);');
+		} else if (self.objectTypeIs(value, 'String')) {
+			browser_windows.pref.webContents.executeJavaScript('savePreference(\"' + key + '\", \"' + value + '\", true);');
+		} else {
+			console.log('[ERROR] Helper - savePref - Unsupported value type: ' + value);
+			throw 'Helper - savePref - Unsupported value type';
+		}
+	},
+
+	/**
+		Check the object type
+	**/
+	objectTypeIs: function(obj, type) {
+		// Thanks: http://qiita.com/Layzie/items/465e715dae14e2f601de
+		var clas = Object.prototype.toString.call(obj).slice(8, -1);
+		return obj !== undefined && obj !== null && clas === type;
+	},
+
+	/**
+		Check whether there is newer version and download it
+		@param updater Instance of Updater
+	**/
+	execAutoUpdate: function(updater) {
+		var self = this;
+
+		if (updater == null) {
+			console.log('[WARN] Helper - execAutoUpdate - updater is null!');
+			return;
+		}
+
+		// Check whether there is newer version and update myself
+		updater.checkAndUpdate(function(is_successful, is_available, version_str, error_str) {
+			if (error_str) {
+				console.log('[ERROR] Update check failed: ' + error_str);
+			} else if (is_successful && is_available) {
+				console.log('[INFO] Update successful: v' + version_str);
+			} else if (!is_available) {
+				console.log('[INFO] Update check successful: v' + version_str + ' (already latest)');
+			}
+		});
 	}
+
 };

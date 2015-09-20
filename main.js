@@ -1,7 +1,9 @@
 /**
-*	odenwlan-node
-*	(C) OdenTools Project
-**/
+ * odenwlan-node
+ * ---------------
+ * Released under MIT License by OdenTools Project.
+ * https://github.com/odentools/odenwlan-node/
+ */
 'use strict';
 
 // Make an instance of the application
@@ -12,15 +14,20 @@ var Menu = require('menu');
 var Tray = require('tray');
 var BrowserWindow = require('browser-window');
 
+// Load helper module
+var Helper = require(__dirname + '/js/helper'); // It include static methods
+
 // Const values
 var STATUS_CHECK_INTERVAL = 2000; 			// Status checking works every 2 seconds
 var STATUS_CHECK_LOOP_TIMEOUT = 60000;		// 1 minutes after connection changed
 var LOGIN_RETRY_COUNT_LIMIT = 8;			// Retry count limit for login
 
 // Instances
-var ipc = require('ipc'); 		// IPC module
-var mHelper = require(__dirname + '/js/helper'); // Helper module
+var ipc = require('ipc'); 	// IPC module
 var mAuth = null;			// Authentication module
+var mUpdater = null;		// Updater module for auto updating of app
+var isUpdaterDryRun = false;// Dry-run mode for Updater
+var isDebug = false;		// Debug logging mode
 var isOnline = null;		// Connection status
 var conChangedAt = -1;		// Epoch-time that connection has been changed (It will reset sometime )
 var loginRetryCount = 0;	// Failed count of login processing
@@ -31,8 +38,22 @@ var browserWindows = {		// Instances of Browser Window
 	worker: null,			// Hidden window for the online detection
 };
 
+// Check for whether a own is development version
+process.argv.forEach(function(element, index, array) {
+	if (element.match(/^--env=(.+)$/) && RegExp.$1 == 'development') {
+		isUpdaterDryRun = true;
+		isDebug = true;
+		console.log('[INFO] Detected the development environment!'
+		+ ' -- Debug logging is enabled and Updater is dry-run mode.');
+	}
+});
+
 // Read a manifest of the app
 var manifest = require('./package.json');
+
+// Do self test if needed
+var Updater = require('electron-updater-gh-releases');
+Updater.doSelfTestIfNeeded();
 
 // Don't exit the app when the window closed
 app.on('window-all-closed', function() {
@@ -52,7 +73,7 @@ app.on('ready', function() {
 		{
 			label: 'About',
 			click: function() {
-				mHelper.showAboutWindow(browserWindows);
+				Helper.showAboutWindow(browserWindows);
 			}
 		},
 		{
@@ -61,7 +82,7 @@ app.on('ready', function() {
 		{
 			label: 'Preferences',
 			click: function() {
-				mHelper.showPrefWindow(browserWindows);
+				Helper.showPrefWindow(browserWindows);
 			}
 		},
 		{
@@ -92,20 +113,41 @@ app.on('ready', function() {
 				message: 'Thanks for installing :)\nPlease input your MC2-account id and password.',
 				buttons: ['OK']
 			});
-			mHelper.showPrefWindow(browserWindows);
+			Helper.showPrefWindow(browserWindows);
 		} else {
+			// Debug
+			if (isDebug) console.log('[DEBUG] Preferences: ', args);
+
 			// Initialize an instance of the authentication module
 			var Wifi = require(__dirname + '/js/auth/mc2wifi');
 			mAuth = new Wifi({
-				'username': args.loginId,
-				'password': args.loginPw
+				username: args.loginId,
+				password: args.loginPw,
+				userAgent: 'odenwlan-node/v' + manifest.version,
+				isDebug: isDebug || args.isDebug || false
+			});
+
+			// Initialize an instance of the updater module
+			mUpdater = new Updater({
+				appVersion: manifest.version,
+				execFileName: 'odenwlan',
+				releaseFileNamePrefix: 'odenwlan-',
+				userAgent: 'odenwlan-node/v' + manifest.version,
+				ghAccountName: 'odentools',
+				ghRepoName: 'odenwlan-node',
+				isDebug: isDebug || args.isDebug || false,
+				isDryRun: isUpdaterDryRun || false,
+				updateCheckedAt: args.updateCheckedAt || 0,
+				funcSaveUpdateCheckdAt: function(epoch_msec) {
+					Helper.savePref(browserWindows, 'updateCheckedAt', epoch_msec);
+				}
 			});
 
 			// Clear a failed count
 			loginRetryCount = 0;
 		}
 	});
-	mHelper.initPrefWindow(browserWindows);
+	Helper.initPrefWindow(browserWindows);
 	var is_init_load_preferences = false;
 	browserWindows.pref.webContents.on('did-finish-load', function() {
 		if (!is_init_load_preferences) {
@@ -125,7 +167,7 @@ app.on('ready', function() {
 		}
 		isOnline = args.isOnline;
 	});
-	mHelper.initWorkerBrowser(browserWindows);
+	Helper.initWorkerBrowser(browserWindows);
 
 	// Start a timer for the status checking
 	var is_processing = false;
@@ -221,6 +263,9 @@ app.on('ready', function() {
 						// Processing was done
 						is_processing = false;
 
+						// Check whether there is newer version and download it
+						Helper.execAutoUpdate(mUpdater);
+
 					});
 
 				} else {
@@ -235,6 +280,9 @@ app.on('ready', function() {
 					// Processing was done
 					is_processing = false;
 
+					// Check whether there is newer version and download it
+					Helper.execAutoUpdate(mUpdater);
+
 				}
 			});
 
@@ -244,4 +292,5 @@ app.on('ready', function() {
 		}
 
 	}, STATUS_CHECK_INTERVAL);
+
 });

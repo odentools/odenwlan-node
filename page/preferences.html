@@ -39,14 +39,36 @@
 			}
 
 			/**
+				Save preference item
+			**/
+			function savePreference(key, value, opt_is_dont_send) {
+				localStorage.setItem(key, value);
+
+				if (!opt_is_dont_send) {
+					sendPreferencesToMainProcess();
+				}
+
+				window.close();
+			}
+
+			/**
 				Send preferences to the main process
 				(This method calls when the main-process reads preferences)
 			**/
 			function sendPreferencesToMainProcess() {
 				var ipc = require('ipc');
-				ipc.send('fetch-preferences', {
-					loginId: localStorage.getItem('loginId'),
-					loginPw: localStorage.getItem('loginPw')
+				ipc.send('fetch-preferences', localStorage);
+			}
+
+			/**
+				Send preference to the main process
+				(This method calls when the main-process reads preferences)
+			**/
+			function sendPreferenceToMainProcess(key) {
+				var ipc = require('ipc');
+				ipc.send('fetch-preference', {
+					key: key,
+					value: localStorage.getItem(key)
 				});
 			}
 

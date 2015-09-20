@@ -16,7 +16,8 @@ module.exports = function(grunt) {
 					version: '0.29.2',
 					platform: 'linux',
 					arch: 'x64',
-					icon: 'img/icon.png'
+					icon: 'img/icon.png',
+					overwrite: true
 				}
 			},
 			win32: {
@@ -29,12 +30,14 @@ module.exports = function(grunt) {
 					platform: 'win32',
 					arch: 'ia32',
 					icon: 'img/icon.png',
+					overwrite: true,
 					'version-string.CompanyName': '<%= pkg.author %>',
 					'version-string.LegalCopyright': '(C) <%= pkg.author %>',
 					'version-string.ProductName': 'odenwlan-node',
 					'version-string.ProductVersion': '<%= pkg.version %>',
 					'version-string.FileDescription': '<%= pkg.description %>',
 					'version-string.FileVersion': '<%= grunt.template.today("yyyymmdd") %>'
+
 				}
 			}
 		},

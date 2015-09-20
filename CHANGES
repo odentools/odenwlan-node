@@ -1,5 +1,8 @@
 # Change log of odenwlan-node
 
+## v1.2.0
+* New function: Auto update
+
 ## v1.1.2
 * Fixed a malfunction in dns lookup of the request module
 
