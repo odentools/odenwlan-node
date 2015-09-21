@@ -1,7 +1,9 @@
 # Change log of odenwlan-node
 
 ## v1.2.0
-* New function: Auto update
+* New: Auto update
+* Fix: Improved online checker
+* Fix: Fixed a malfunction in post processing of login
 
 ## v1.1.2
 * Fixed a malfunction in dns lookup of the request module

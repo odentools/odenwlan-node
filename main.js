@@ -43,7 +43,7 @@ process.argv.forEach(function(element, index, array) {
 	if (element.match(/^--env=(.+)$/) && RegExp.$1 == 'development') {
 		isUpdaterDryRun = true;
 		isDebug = true;
-		console.log('[INFO] Detected the development environment!'
+		Helper.dlog('[INFO] Detected the development environment!'
 		+ ' -- Debug logging is enabled and Updater is dry-run mode.');
 	}
 });
@@ -104,7 +104,7 @@ app.on('ready', function() {
 
 	// Check the current preferences
 	ipc.on('fetch-preferences', function(event, args) {
-		console.log('IPC Received: fetch-preferences');
+		Helper.dlog('IPC Received: fetch-preferences');
 		if (args.loginId == null || args.loginPw == null) {
 			// First setup
 			require('dialog').showMessageBox(null, {
@@ -116,7 +116,7 @@ app.on('ready', function() {
 			Helper.showPrefWindow(browserWindows);
 		} else {
 			// Debug
-			if (isDebug) console.log('[DEBUG] Preferences: ', args);
+			if (isDebug) Helper.dlog('[DEBUG] Preferences: ', args);
 
 			// Initialize an instance of the authentication module
 			var Wifi = require(__dirname + '/js/auth/mc2wifi');
@@ -158,7 +158,7 @@ app.on('ready', function() {
 
 	// Make a browser for the online detection
 	ipc.on('online-status-changed', function(event, args) {
-		console.log('IPC Received: online-status-changed - ' + args.isOnline);
+		Helper.dlog('IPC Received: online-status-changed - ' + args.isOnline);
 		if (isOnline == null || args.isOnline != isOnline) { // Changed to online
 			// Set a now time to the connection changed time
 			conChangedAt = new Date().getTime();
@@ -210,12 +210,12 @@ app.on('ready', function() {
 
 		// Status check
 		is_processing = true;
-		console.log('-- Checking for login status --');
+		Helper.dlog('-- Checking for login status --');
 		appTray.setToolTip('odenwlan-node : Checking...');
 		appTray.setImage(__dirname + '/img/icon_tray_wait_a.png'); // Change the icon to waiting
 		try {
 			mAuth.checkLoginStatus(function(login_status) {
-				console.log('Login status: ' + login_status);
+				Helper.dlog('Login status: ' + login_status);
 
 				if (login_status == null) { // It may be connecting now
 					is_processing = false;
@@ -224,7 +224,7 @@ app.on('ready', function() {
 
 				if (!login_status) {
 					// Login
-					console.log('-- Trying to login (' + loginRetryCount + ') --');
+					Helper.dlog('-- Trying to login (' + loginRetryCount + ') --');
 					appTray.setToolTip('odenwlan-node : Trying to login...');
 					mAuth.login(function(is_successful, error_text) {
 
@@ -259,7 +259,7 @@ app.on('ready', function() {
 
 						}
 
-						console.log('Login result: ' + is_successful);
+						Helper.dlog('Login result: ' + is_successful);
 						// Processing was done
 						is_processing = false;
 
@@ -269,7 +269,7 @@ app.on('ready', function() {
 					});
 
 				} else {
-					console.log('Already logged-in :)');
+					Helper.dlog('Already logged-in :)');
 					// Clear a failed count
 					loginRetryCount = 0;
 					// Change the status to online
@@ -287,7 +287,7 @@ app.on('ready', function() {
 			});
 
 		} catch (e) {
-			console.log('[ERROR] ' + e);
+			Helper.dlog('[ERROR] ' + e);
 			is_processing = false;
 		}
 

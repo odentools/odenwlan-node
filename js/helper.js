@@ -121,6 +121,18 @@ module.exports = {
 	},
 
 	/**
+		Output an log
+		@param string String a log
+	**/
+	dlog: function(str) {
+		var self = this;
+
+		var date = new Date();
+		console.log('[' + (date.getHours() + 1) + ':' + (date.getMinutes()) + ':' + (date.getSeconds()) + '] ' + str);
+
+	},
+
+	/**
 		Check whether there is newer version and download it
 		@param updater Instance of Updater
 	**/
