@@ -1,4 +1,4 @@
-var path = require('path');
+var path = require('path'), Helper = require('../helper');
 
 /**
  * Authentication client module for MC2Wifi and MC2Phone
@@ -16,10 +16,13 @@ var Client = function(options) {
 	this.httpsProxy = 'http://172.25.250.41:8080/';
 
 	// WAN connection check url (It must be HTTP page; Don't to HTTPS)
-	this.wanOnlineCheckUrl = 'http://odentools.github.io/';
+	this.wanOnlineCheckUrl = 'http://odentools.github.io/online/';
 
 	// User-Agent string
 	this.userAgent = options.userAgent || 'odenwlan-node';
+
+	// Timeout for request (milisecond)
+	this.timeout = 4000;
 
 	// Certificate files for login processing
 	this.isCertCheck = false;
@@ -203,6 +206,8 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 	@param base_url Base URL for the redirect by relative path
 **/
 Client.prototype._requestIncludeResources = function(body, base_url) {
+	var self = this;
+
 	var img_url = null;
 	if (body.match(/img src\=[\"\'](http:\/\/|)([^\"\']+)[\"\']/)) {
 		img_url = RegExp.$2;
@@ -221,9 +226,18 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 	}
 
 	this._dlog('_requestIncludeResources - IMG GET: ' + img_url);
-
-	var request = require('request');
-	request.get(img_url);
+	var request = self._getRequestModule();
+	request({
+		url: img_url,
+		timeout: self.timeout,
+		proxy: null
+	}, function(err, res, body) {
+		if (err) {
+			this._dlog('_requestIncludeResources - Result: ' + err.toString() + ' (error)');
+		} else {
+			this._dlog('_requestIncludeResources - Result: ' + res.statusLine);
+		}
+	});
 };
 
 
@@ -257,13 +271,14 @@ Client.prototype.checkLoginStatus = function(callback) {
 	var now = new Date().getTime();
 
 	// Access to WAN
-	var req = {
+	request({
 		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
 		headers: {
 			'User-Agent': self.userAgent
-		}
-	};
-	request(req, function(err, res, body) {
+		},
+		timeout: self.timeout,
+		proxy: null
+	}, function(err, res, body) {
 		if (!err && res.statusCode == 200) {
 			if (body.match(/無線LAN 利用者確認ページ/)) {
 				callback(false); // Not logged-in
@@ -272,8 +287,13 @@ Client.prototype.checkLoginStatus = function(callback) {
 			}
 		} else { // If could not access to WAN
 			self._dlog('Could not access to WAN!');
+			self._dlog(err);
 			// Access to authentication page
-			request('http://wlanlogin.mc2ed.sjn.osakac.ac.jp/', function (err, res, body) {
+			request({
+				url: 'http://wlanlogin.mc2ed.sjn.osakac.ac.jp/',
+				timeout: self.timeout,
+				proxy: null
+			}, function (err, res, body) {
 				if (!err && res.statusCode == 200) {
 					callback(false); // Not logged-in
 				} else { // If could not access to authentication page
@@ -301,7 +321,7 @@ Client.prototype._getRequestModule = function(str) {
 **/
 Client.prototype._dlog = function(str) {
 	if (this.isDebug) {
-		console.log('' + str);
+		Helper.dlog(str);
 	}
 };
 
