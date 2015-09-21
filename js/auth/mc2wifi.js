@@ -48,6 +48,7 @@ Client.prototype.login = function(callback) {
 	var url = 'http://osakac.ac.jp/';
 	client._dlog('login - GET: ' + url);
 	var req = http.get(url, function (res) { // When the 1st request was completed
+		client._dlog('login - Response received for GET');
 		if (res.statusCode == 301 || res.statusCode == 302) { // Redirect
 			var redirect_url = res.headers.location;
 
@@ -103,20 +104,23 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	// 2nd request - POST for authentication with validation by certificate
 	self._dlog('login - POST: ' + base_url + '/login');
 	var request = self._getRequestModule();
-	request.post({
-		'url': base_url + '/login',
-		'ca': cert,
-		'followRedirect': false,
-		'followAllRedirects': false,
-		'rejectUnauthorized': true,
-		'form': {
-			'username': this.username,
-			'password': this.password,
-			'submit': 'Login'
-		}
+	request({
+		method: 'POST',
+		url: base_url + '/login',
+		ca: cert,
+		followRedirect: false,
+		followAllRedirects: false,
+		rejectUnauthorized: true,
+		form: {
+			username: self.username,
+			password: self.password,
+			submit: 'Login'
+		},
+		timeout: self.timeout
 	}, function(err, res, body) { // When the 2st request was completed
 
 		var redirect_url = null;
+		self._dlog('login - Response received for POST');
 
 		if (!err && (res.statusCode == 301 || res.statusCode == 302)) { // HTTP Redirect
 			redirect_url = res.headers.location;
@@ -225,7 +229,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 		return;
 	}
 
-	this._dlog('_requestIncludeResources - IMG GET: ' + img_url);
+	self._dlog('_requestIncludeResources - IMG GET: ' + img_url);
 	var request = self._getRequestModule();
 	request({
 		url: img_url,
@@ -233,9 +237,9 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 		proxy: null
 	}, function(err, res, body) {
 		if (err) {
-			this._dlog('_requestIncludeResources - Result: ' + err.toString() + ' (error)');
+			self._dlog('_requestIncludeResources - Result: ' + err.toString() + ' (error)');
 		} else {
-			this._dlog('_requestIncludeResources - Result: ' + res.statusLine);
+			self._dlog('_requestIncludeResources - Result: ' + res.statusLine);
 		}
 	});
 };
@@ -247,13 +251,15 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 	@param base_url Base URL for the redirect by relative path
 **/
 Client.prototype._getJsRedirectUrl = function(body, base_url) {
+	var self = this;
+
 	var redirect_url = null;
 	if (body.match(/window\.location\.href\=[\"\'](http\:\/\/[^\'\"]+)[\"\']/)) { // JS Redirect
 		redirect_url = RegExp.$1;
-		this._dlog('_getJsRedirectUrl - Detect JS Redirect(A): ' + redirect_url);
+		self._dlog('_getJsRedirectUrl - Detect JS Redirect(A): ' + redirect_url);
 	} else if (body.match(/window\.location\.href\=[\"\']([^\'\"]+)[\"\']/)) { // JS Redirect
 		redirect_url = base_url + RegExp.$1;
-		this._dlog('_getJsRedirectUrl - Detect JS Redirect(B): ' + redirect_url);
+		self._dlog('_getJsRedirectUrl - Detect JS Redirect(B): ' + redirect_url);
 	}
 	return redirect_url;
 };
@@ -270,7 +276,8 @@ Client.prototype.checkLoginStatus = function(callback) {
 	var request = self._getRequestModule();
 	var now = new Date().getTime();
 
-	// Access to WAN
+	// Access to WAN without proxy
+	self._dlog('checkLoginStatus - Trying to access to WAN without proxy...');
 	request({
 		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
 		headers: {
@@ -279,28 +286,65 @@ Client.prototype.checkLoginStatus = function(callback) {
 		timeout: self.timeout,
 		proxy: null
 	}, function(err, res, body) {
+
 		if (!err && res.statusCode == 200) {
 			if (body.match(/無線LAN 利用者確認ページ/)) {
+				self._dlog('checkLoginStatus - Could not access to WAN without proxy! (Redirected to auth page)');
 				callback(false); // Not logged-in
 			} else {
-				callback(true); // Logged-in or Connected to other network
+				self._dlog('checkLoginStatus - Okay; Could access to WAN without proxy :)');
+				callback(true); // Logged-in to MC2phone or Connected to other network
 			}
-		} else { // If could not access to WAN
-			self._dlog('Could not access to WAN!');
-			self._dlog(err);
-			// Access to authentication page
+			return;
+		}
+
+		// If could not access to WAN without proxy
+		self._dlog('checkLoginStatus - Could not access to WAN without proxy!');
+		if (err != null) self._dlog('-- Details: ' + err.toString());
+
+		// Access to WAN with proxy
+		self._dlog('checkLoginStatus - Trying to access to WAN with proxy... (' + self.httpProxy + ')');
+		request({
+			url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
+			headers: {
+				'User-Agent': self.userAgent
+			},
+			timeout: self.timeout,
+			proxy: self.httpProxy
+		}, function(err, res, body) {
+
+			if (!err && res.statusCode == 200) {
+				self._dlog('checkLoginStatus - Okay; Could access to WAN with proxy :)');
+				callback(true); // Logged-in to MC2wifi
+				return;
+			}
+
+			// If could not access to WAN without proxy
+			self._dlog('checkLoginStatus - Could not access to WAN with proxy!');
+			if (err != null) self._dlog('-- Details: ' + err.toString());
+
+			// Access to authentication page without proxy
+			self._dlog('checkLoginStatus - Trying to access to LAN...');
 			request({
 				url: 'http://wlanlogin.mc2ed.sjn.osakac.ac.jp/',
 				timeout: self.timeout,
 				proxy: null
 			}, function (err, res, body) {
+
 				if (!err && res.statusCode == 200) {
+					self._dlog('checkLoginStatus - Okay; Could access to LAN :)');
 					callback(false); // Not logged-in
-				} else { // If could not access to authentication page
-					callback(null); // It maybe offline
+					return;
 				}
+
+				// If could not access to authentication page
+				self._dlog('checkLoginStatus - Could not access to LAN!');
+				callback(null); // It maybe offline
+
 			});
-		}
+
+		});
+
 	});
 };
 
