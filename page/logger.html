@@ -121,7 +121,8 @@
 					row.typeInitial = (row.type != null) ? row.type.toString().substr(0, 1).toUpperCase() : '?';
 					// Created time
 					var created_at = new Date(row.createdAt);
-					row.createdTimeStr = (created_at.getHours() + 1) + ':' + created_at.getMinutes() + ':' + created_at.getSeconds();
+					row.createdTimeStr = zeroPadding(created_at.getHours(), 2) + ':' + zeroPadding(created_at.getMinutes(), 2)
+						+ ':' + zeroPadding(created_at.getSeconds(), 2);
 				}
 
 				logItems = log_items;

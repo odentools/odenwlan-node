@@ -63,7 +63,7 @@ Logger.prototype.dlog = function(tag, str) {
 	});
 
 	if (!self.isOutput) return;
-	console.log('[D ' + (now.getHours() + 1) + ':' + (now.getMinutes()) + ':' + (now.getSeconds()) + '] ' + tag + ' / ' + str);
+	console.log('[D ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + '] ' + tag + ' / ' + str);
 
 	self._cleanup();
 
@@ -88,7 +88,7 @@ Logger.prototype.ilog = function(tag, str) {
 	});
 
 	if (!self.isOutput) return;
-	console.log('[I ' + (now.getHours() + 1) + ':' + (now.getMinutes()) + ':' + (now.getSeconds()) + '] ' + tag + ' / ' + str);
+	console.log('[I ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + '] ' + tag + ' / ' + str);
 
 	self._cleanup();
 
@@ -113,7 +113,7 @@ Logger.prototype.wlog = function(tag, str) {
 	});
 
 	if (!self.isOutput) return;
-	console.log('[W ' + (now.getHours() + 1) + ':' + (now.getMinutes()) + ':' + (now.getSeconds()) + '] ' + tag + ' / ' + str);
+	console.log('[W ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + '] ' + tag + ' / ' + str);
 
 	self._cleanup();
 
@@ -138,7 +138,7 @@ Logger.prototype.elog = function(tag, str) {
 	});
 
 	if (!self.isOutput) return;
-	console.log('[E ' + (now.getHours() + 1) + ':' + (now.getMinutes()) + ':' + (now.getSeconds()) + '] ' + tag + ' / ' + str);
+	console.log('[E ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + '] ' + tag + ' / ' + str);
 
 	self._cleanup();
 
