@@ -1,4 +1,8 @@
 # Change log of odenwlan-node
+See also: https://github.com/odentools/odenwlan-node/releases
+
+## v1.3.0
+* New: Debug log window
 
 ## v1.2.0
 * New: Auto update
