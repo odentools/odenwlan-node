@@ -152,6 +152,7 @@ app.on('ready', function() {
 				ghRepoName: 'odenwlan-node',
 				isDebug: isDebug || args.isDebug || false,
 				isDryRun: isUpdaterDryRun || false,
+				updateCheckInterval: 60 * 60 * 12 * 1000, // 12 hours
 				updateCheckedAt: args.updateCheckedAt || 0,
 				funcSaveUpdateCheckdAt: function(epoch_msec) {
 					Helper.savePref(browserWindows, 'updateCheckedAt', epoch_msec);
