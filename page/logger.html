@@ -114,7 +114,7 @@
 			 */
 			require('ipc').on('send-logs', function(log_items) {
 
-				// Format logs
+				// Format the logs
 				for (var i = 0, l = log_items.length; i < l; i++) {
 					var row = log_items[i];
 					// Initial of type -- e.g. debug -> D
@@ -126,7 +126,7 @@
 
 				logItems = log_items;
 
-				// ログを表示
+				// Show the logs
 				showLogs(log_items);
 
 			});
