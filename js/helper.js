@@ -1,4 +1,4 @@
-var BrowserWindow = require('browser-window');
+var BrowserWindow = require('browser-window'), Logger = require('./logger');
 
 /**
  * An helper which include static methods
@@ -88,6 +88,42 @@ module.exports = {
 	},
 
 	/**
+		Initialize the logger window
+		@param browser_windows	Associative array of BrowserWindow
+	**/
+	initLoggerWindow: function(browser_windows) {
+		if (browser_windows.logger != null) {
+			browser_windows.logger.loadUrl('file://' + __dirname + '/../page/logger.html');
+			return;
+		}
+
+		// Make the logger window
+		browser_windows.logger = new BrowserWindow({
+			width: 800,
+			height: 600,
+			show: false
+		});
+		browser_windows.logger.setMenu(null);
+		browser_windows.logger.on('closed', function() {
+			browser_windows.logger = null;
+		});
+		browser_windows.logger.loadUrl('file://' + __dirname + '/../page/logger.html');
+	},
+
+	/**
+		Show the logger window
+		@param browser_windows	Associative array of BrowserWindow
+		@param logger_instance	Logger instance
+	**/
+	showLoggerWindow: function(browser_windows, logger_instance) {
+		this.initLoggerWindow(browser_windows);
+		browser_windows.logger.show();
+		setTimeout(function() {
+			browser_windows.logger.webContents.send('send-logs', logger_instance.getLogs());
+		}, 500);
+	},
+
+	/**
 		Save a value to preference (localStorage)
 		@param browser_windows	Associative array of BrowserWindow
 		@param key		Key of item
@@ -121,37 +157,27 @@ module.exports = {
 	},
 
 	/**
-		Output an log
-		@param string String a log
-	**/
-	dlog: function(str) {
-		var self = this;
-
-		var date = new Date();
-		console.log('[' + (date.getHours() + 1) + ':' + (date.getMinutes()) + ':' + (date.getSeconds()) + '] ' + str);
-
-	},
-
-	/**
 		Check whether there is newer version and download it
 		@param updater Instance of Updater
 	**/
 	execAutoUpdate: function(updater) {
 		var self = this;
 
+		var mLogger = Logger.getInstance();
+
 		if (updater == null) {
-			console.log('[WARN] Helper - execAutoUpdate - updater is null!');
+			mLogger.wlog('helper/execAutoUpdate', 'updater is null!');
 			return;
 		}
 
 		// Check whether there is newer version and update myself
 		updater.checkAndUpdate(function(is_successful, is_available, version_str, error_str) {
 			if (error_str) {
-				console.log('[ERROR] Update check failed: ' + error_str);
+				mLogger.elog('helper/execAutoUpdate', 'Update check failed: ' + error_str);
 			} else if (is_successful && is_available) {
-				console.log('[INFO] Update successful: v' + version_str);
+				mLogger.ilog('helper/execAutoUpdate', 'Update successful: v' + version_str);
 			} else if (!is_available) {
-				console.log('[INFO] Update check successful: v' + version_str + ' (already latest)');
+				mLogger.ilog('helper/execAutoUpdate', 'Update successful: v' + version_str + ' (already latest)');
 			}
 		});
 	}

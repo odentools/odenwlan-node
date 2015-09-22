@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<title>Debug log</title>
+		<style>
+			html, body, .container {
+				background-color: #fefefe;
+			}
+			td.log-type, td.log-created-at, td.log-tag {
+				white-space: nowrap;
+			}
+		</style>
+		<script>
+
+			var logItems = [];
+
+
+			/**
+			 * Copy an logs to clipboard
+			 */
+			function copyReceivedLogs(opt_label_elem) {
+
+				var log_str = new String(), num_of_rows = logItems.length;
+
+				for (var i = 0; i < num_of_rows; i++) {
+					var row = logItems[i];
+
+					if (0 < log_str.length) log_str += '\n';
+					log_str += '[' + row.typeInitial + ' ' + row.createdTimeStr + '] ' + row.tag + ' / ' + row.text;
+				}
+
+				require('clipboard').writeText(log_str);
+
+				if (opt_label_elem != null) {
+					opt_label_elem.innerText = 'Copied ' + num_of_rows + ' rows :)';
+					window.setTimeout(function() {
+						opt_label_elem.innerText = 'Copy to clipboard';
+					}, 1000);
+				}
+
+			};
+
+
+			/**
+			 * Show an logs
+			 * @param  {Array} Array of log items
+			 */
+			function showLogs(log_items) {
+
+				var e_logs = document.getElementById('logs');
+
+				for (var i = 0, l = log_items.length; i < l; i++) {
+					var row = log_items[i];
+					var e_row = document.createElement('tr');
+
+					// Type of log
+					var e_type = document.createElement('td');
+					e_type.className = 'log-type';
+					e_type.innerText = row.typeInitial;
+					if (row.type == 'warn') {
+						e_row.className = 'warning';
+					} else if (row.type == 'error') {
+						e_row.className = 'danger';
+					} else if (row.type == 'info') {
+						e_row.className = 'info';
+					}
+					e_row.appendChild(e_type);
+
+					// Created time
+					var e_created_at = document.createElement('td');
+					e_created_at.className = 'log-created-at';
+					e_created_at.innerText = row.createdTimeStr;
+					e_row.appendChild(e_created_at);
+
+					// Tag of log
+					var e_tag = document.createElement('td');
+					e_type.className = 'log-tag';
+					e_tag.innerText = row.tag;
+					e_row.appendChild(e_tag);
+
+					// Text of log
+					var e_text = document.createElement('td');
+					e_type.className = 'log-text';
+					e_text.innerText = row.text;
+					e_row.appendChild(e_text);
+
+					// Insert an row
+					e_logs.appendChild(e_row);
+				}
+
+			};
+
+
+			/**
+			 * Zero padding of number
+			 * Thanks: http://qiita.com/_shimizu/items/2cb49daf2eb8ffb30690
+			 * @param  {Number} number Number
+			 * @param  {Number} digit  Digit of number
+			 * @return {String} Number string with zero padding
+			 */
+			function zeroPadding(number, digit) {
+
+				return (Array(digit).join('0') + number).slice(-digit);
+
+			};
+
+
+			/* ---- */
+
+			/**
+			 * Receiver for message from main process
+			 * @param  {IPC} 'ipc' IPC module of Electron
+			 */
+			require('ipc').on('send-logs', function(log_items) {
+
+				// Format logs
+				for (var i = 0, l = log_items.length; i < l; i++) {
+					var row = log_items[i];
+					// Initial of type -- e.g. debug -> D
+					row.typeInitial = (row.type != null) ? row.type.toString().substr(0, 1).toUpperCase() : '?';
+					// Created time
+					var created_at = new Date(row.createdAt);
+					row.createdTimeStr = (created_at.getHours() + 1) + ':' + created_at.getMinutes() + ':' + created_at.getSeconds();
+				}
+
+				logItems = log_items;
+
+				// ログを表示
+				showLogs(log_items);
+
+			});
+
+		</script>
+		<link rel="stylesheet" href="../css/bootstrap.min.css">
+	</head>
+	<body>
+		<div class="container">
+
+			<h1>Debug log of odenwlan-node</h1>
+			<a href="javascript:void(0);" class="pull-right" onClick="copyReceivedLogs(this);">Copy to clipboard</a>
+
+			<table class="table table-hover table-bordered">
+				<tbody id="logs"></tbody>
+			</table>
+
+		</div>
+	</body>
+</html>

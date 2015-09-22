@@ -37,14 +37,16 @@ var browserWindows = {		// Instances of Browser Window
 	pref: null,				// Preferences window
 	worker: null,			// Hidden window for the online detection
 };
+var mLogger = require(__dirname + '/js/logger').getInstance(); // Logger module
+mLogger.dlog('main', 'App has been started.');
 
 // Check for whether a own is development version
 process.argv.forEach(function(element, index, array) {
 	if (element.match(/^--env=(.+)$/) && RegExp.$1 == 'development') {
 		isUpdaterDryRun = true;
 		isDebug = true;
-		Helper.dlog('[INFO] Detected the development environment!'
-		+ ' -- Debug logging is enabled and Updater is dry-run mode.');
+		mLogger.ilog('main', 'Detected the development environment!'
+			+ ' -- Debug logging is enabled and Updater is dry-run mode.');
 	}
 });
 
@@ -77,6 +79,12 @@ app.on('ready', function() {
 			}
 		},
 		{
+			label: 'Debug log',
+			click: function() {
+				Helper.showLoggerWindow(browserWindows, mLogger);
+			}
+		},
+		{
 			type: 'separator'
 		},
 		{
@@ -104,7 +112,7 @@ app.on('ready', function() {
 
 	// Check the current preferences
 	ipc.on('fetch-preferences', function(event, args) {
-		Helper.dlog('IPC Received: fetch-preferences');
+		mLogger.dlog('main/IPC.on', 'fetch-preferences');
 		if (args.loginId == null || args.loginPw == null) {
 			// First setup
 			require('dialog').showMessageBox(null, {
@@ -116,7 +124,14 @@ app.on('ready', function() {
 			Helper.showPrefWindow(browserWindows);
 		} else {
 			// Debug
-			if (isDebug) Helper.dlog('[DEBUG] Preferences: ', args);
+			if (isDebug) {
+				var debug_str = '';
+				for (var key in args) {
+					if (debug_str.length != 0) debug_str = debug_str + '\n';
+					debug_str += key + ' = ' + args[key];
+				}
+				mLogger.dlog('main', 'Debug mode is enabled; Preferences: \n' + debug_str);
+			}
 
 			// Initialize an instance of the authentication module
 			var Wifi = require(__dirname + '/js/auth/mc2wifi');
@@ -158,7 +173,7 @@ app.on('ready', function() {
 
 	// Make a browser for the online detection
 	ipc.on('online-status-changed', function(event, args) {
-		Helper.dlog('IPC Received: online-status-changed - ' + args.isOnline);
+		mLogger.dlog('main/IPC.on', 'online-status-changed - ' + args.isOnline);
 		if (isOnline == null || args.isOnline != isOnline) { // Changed to online
 			// Set a now time to the connection changed time
 			conChangedAt = new Date().getTime();
@@ -210,12 +225,12 @@ app.on('ready', function() {
 
 		// Status check
 		is_processing = true;
-		Helper.dlog('-- Checking for login status --');
+		mLogger.dlog('main/statusCheck', 'Checking for login status');
 		appTray.setToolTip('odenwlan-node : Checking...');
 		appTray.setImage(__dirname + '/img/icon_tray_wait_a.png'); // Change the icon to waiting
 		try {
 			mAuth.checkLoginStatus(function(login_status) {
-				Helper.dlog('Login status: ' + login_status);
+				mLogger.dlog('main/statusCheck', 'Login status: ' + login_status);
 
 				if (login_status == null) { // It may be connecting now
 					is_processing = false;
@@ -224,7 +239,7 @@ app.on('ready', function() {
 
 				if (!login_status) {
 					// Login
-					Helper.dlog('-- Trying to login (' + loginRetryCount + ') --');
+					mLogger.dlog('main/statusCheck', 'Trying to login (' + loginRetryCount + ')');
 					appTray.setToolTip('odenwlan-node : Trying to login...');
 					mAuth.login(function(is_successful, error_text) {
 
@@ -234,15 +249,17 @@ app.on('ready', function() {
 							// Change the status to online
 							appTray.setImage(__dirname + '/img/icon_tray_online.png');
 							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
+							mLogger.ilog('main/statusCheck', 'Authenticate was successful.');
 
 						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
 							// Don't retry
 							loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
 							// Show a message
+							mLogger.elog('main/statusCheck', 'Authenticate was failed; Invalid id or password.');
 							require('dialog').showMessageBox(null, {
 								type: 'info',
-								title: 'Authentication was failed',
-								message: 'Authentication was failed.\nPlease check your MC2-account id and password.',
+								title: 'Authenticate was failed',
+								message: 'Authenticate was failed.\nPlease check your MC2-account id and password.',
 								buttons: ['OK']
 							});
 
@@ -254,12 +271,14 @@ app.on('ready', function() {
 							appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
 							// Show the error message
 							if (error_text != null) {
-								console.error('[ERROR] ' + error_text);
+								mLogger.elog('main/statusCheck', 'Authenticate was failed; ' + error_text);
+							} else {
+								mLogger.elog('main/statusCheck', 'Authenticate was failed; Unknown error.');
 							}
 
 						}
 
-						Helper.dlog('Login result: ' + is_successful);
+						mLogger.dlog('main/statusCheck', 'Login result: ' + is_successful);
 						// Processing was done
 						is_processing = false;
 
@@ -269,7 +288,7 @@ app.on('ready', function() {
 					});
 
 				} else {
-					Helper.dlog('Already logged-in :)');
+					mLogger.dlog('main/statusCheck', 'Already logged-in :)');
 					// Clear a failed count
 					loginRetryCount = 0;
 					// Change the status to online
@@ -287,7 +306,7 @@ app.on('ready', function() {
 			});
 
 		} catch (e) {
-			Helper.dlog('[ERROR] ' + e);
+			mLogger.dlog('main/statusCheck', e.toString());
 			is_processing = false;
 		}
 

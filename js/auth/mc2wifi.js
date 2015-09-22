@@ -1,4 +1,4 @@
-var path = require('path'), Helper = require('../helper');
+var path = require('path'), Logger = require('../logger'), Helper = require('../helper');
 
 /**
  * Authentication client module for MC2Wifi and MC2Phone
@@ -33,6 +33,9 @@ var Client = function(options) {
 	// Debug mode
 	this.isDebug = true;
 
+	// Logger
+	this.logger = Logger.getInstance();
+
 };
 
 
@@ -42,18 +45,18 @@ var Client = function(options) {
 **/
 Client.prototype.login = function(callback) {
 	var http = require('http');
-	var client = this;
+	var self = this;
 
 	// 1st request - GET for redirect to authentication-page
 	var url = 'http://osakac.ac.jp/';
-	client._dlog('login - GET: ' + url);
+	self.logger.dlog('mc2wifi/login', 'GET: ' + url);
 	var req = http.get(url, function (res) { // When the 1st request was completed
-		client._dlog('login - Response received for GET');
+		self.logger.dlog('mc2wifi/login', 'Response received for GET');
 		if (res.statusCode == 301 || res.statusCode == 302) { // Redirect
 			var redirect_url = res.headers.location;
 
 			// Go to 2nd request - POST for authentication with validation by certificate
-			client._loginSecondRequest(redirect_url, callback);
+			self._loginSecondRequest(redirect_url, callback);
 
 		} else if (res.statusCode == 200) { // 1st request was successful; but not redirect
 			callback(false, '1st request was successful; not redirect'); // May be already logged-in
@@ -65,7 +68,7 @@ Client.prototype.login = function(callback) {
 
 	});
 	req.on('error', function(err) { // Error handling for internal error (g.g, dns error)
-		client._dlog('login - Internal error occured: ' + err);
+		self.logger.elog('mc2wifi/login', 'Internal error occured (ignored): ' + err);
 		callback(false, '1st request was failed');
 	});
 };
@@ -95,14 +98,14 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	// Set a certificate for validate the authentication page
 	var cert = null;
 	if (self.isCertCheck && cert_file != null) {
-		self._dlog('login - Load certificate: ' + cert_file);
+		self.logger.dlog('mc2wifi/login', 'Load certificate: ' + cert_file);
 		cert = require('fs').readFileSync(path.resolve(__dirname, '../../cert/' + cert_file));
 	} else {
-		self._dlog('login - Not load certificate');
+		self.logger.dlog('mc2wifi/login', 'Not load certificate');
 	}
 
 	// 2nd request - POST for authentication with validation by certificate
-	self._dlog('login - POST: ' + base_url + '/login');
+	self.logger.dlog('mc2wifi/login', 'POST: ' + base_url + '/login');
 	var request = self._getRequestModule();
 	request({
 		method: 'POST',
@@ -120,11 +123,11 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	}, function(err, res, body) { // When the 2st request was completed
 
 		var redirect_url = null;
-		self._dlog('login - Response received for POST');
+		self.logger.dlog('mc2wifi/login', 'Response received for POST');
 
 		if (!err && (res.statusCode == 301 || res.statusCode == 302)) { // HTTP Redirect
 			redirect_url = res.headers.location;
-			self._dlog('login - Detect HTTP Redirect: ' + redirect_url);
+			self.logger.dlog('mc2wifi/login', 'Detect HTTP Redirect: ' + redirect_url);
 
 			// Go to 3rd request - Redirect-loop after authentication
 			self._requestRedirectLoop(redirect_url, base_url, callback, 0);
@@ -138,7 +141,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 				// Go to 3rd request - Redirect-loop after authentication
 				self._requestRedirectLoop(redirect_url, base_url, callback, 0);
 			} else {
-				self._dlog(body);
+				self.logger.dlog('mc2wifi/_loginSecondRequest', body);
 				callback(false, '2nd request was success ful; but not redirect');
 			}
 
@@ -169,18 +172,17 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 
 	// Request
 	var request = self._getRequestModule();
-	self._dlog('_requestRedirectLoop - GET(' + count + '): ' + url);
+	self.logger.dlog('mc2wifi/_requestRedirectLoop', 'GET(' + count + '): ' + url);
 	request.get({
 		'url': url,
 		'followRedirect': false,
 		'followAllRedirects': false
 	}, function (err, res, body) {
-		console.log(body);
 
 		var redirect_url = null;
 		if (!err && res.statusCode == 301 || res.statusCode == 302) { // HTTP Redirect
 			redirect_url = res.headers.location;
-			self._dlog('_requestRedirectLoop - Detect HTTP Redirect: ' + redirect_url);
+			self.logger.dlog('mc2wifi/_requestRedirectLoop', 'Detect HTTP Redirect: ' + redirect_url);
 		} else if (!err && res.statusCode == 200) {
 			// Processing included resources
 			self._requestIncludeResources(body, base_url);
@@ -229,7 +231,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 		return;
 	}
 
-	self._dlog('_requestIncludeResources - IMG GET: ' + img_url);
+	self.logger.dlog('mc2wifi/_requestIncludeResources', 'IMG GET: ' + img_url);
 	var request = self._getRequestModule();
 	request({
 		url: img_url,
@@ -237,9 +239,9 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 		proxy: null
 	}, function(err, res, body) {
 		if (err) {
-			self._dlog('_requestIncludeResources - Result: ' + err.toString() + ' (error)');
+			self.logger.elog('mc2wifi/_requestIncludeResources', 'Result: ' + err.toString() + ' (error)');
 		} else {
-			self._dlog('_requestIncludeResources - Result: ' + res.statusLine);
+			self.logger.dlog('mc2wifi/_requestIncludeResources', 'Result: ' + res.statusLine);
 		}
 	});
 };
@@ -256,10 +258,10 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 	var redirect_url = null;
 	if (body.match(/window\.location\.href\=[\"\'](http\:\/\/[^\'\"]+)[\"\']/)) { // JS Redirect
 		redirect_url = RegExp.$1;
-		self._dlog('_getJsRedirectUrl - Detect JS Redirect(A): ' + redirect_url);
+		self.logger.dlog('mc2wifi/_getJsRedirectUrl', 'Detect JS Redirect(A): ' + redirect_url);
 	} else if (body.match(/window\.location\.href\=[\"\']([^\'\"]+)[\"\']/)) { // JS Redirect
 		redirect_url = base_url + RegExp.$1;
-		self._dlog('_getJsRedirectUrl - Detect JS Redirect(B): ' + redirect_url);
+		self.logger.dlog('mc2wifi/_getJsRedirectUrl', 'Detect JS Redirect(B): ' + redirect_url);
 	}
 	return redirect_url;
 };
@@ -277,7 +279,7 @@ Client.prototype.checkLoginStatus = function(callback) {
 	var now = new Date().getTime();
 
 	// Access to WAN without proxy
-	self._dlog('checkLoginStatus - Trying to access to WAN without proxy...');
+	self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to WAN without proxy...');
 	request({
 		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
 		headers: {
@@ -289,21 +291,21 @@ Client.prototype.checkLoginStatus = function(callback) {
 
 		if (!err && res.statusCode == 200) {
 			if (body.match(/無線LAN 利用者確認ページ/)) {
-				self._dlog('checkLoginStatus - Could not access to WAN without proxy! (Redirected to auth page)');
+				self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN without proxy! (Redirected to auth page)');
 				callback(false); // Not logged-in
 			} else {
-				self._dlog('checkLoginStatus - Okay; Could access to WAN without proxy :)');
+				self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to WAN without proxy :)');
 				callback(true); // Logged-in to MC2phone or Connected to other network
 			}
 			return;
 		}
 
 		// If could not access to WAN without proxy
-		self._dlog('checkLoginStatus - Could not access to WAN without proxy!');
-		if (err != null) self._dlog('-- Details: ' + err.toString());
+		self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN without proxy!');
+		if (err != null) self.logger.dlog('mc2wifi/-', ' Details: ' + err.toString());
 
 		// Access to WAN with proxy
-		self._dlog('checkLoginStatus - Trying to access to WAN with proxy... (' + self.httpProxy + ')');
+		self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to WAN with proxy... (' + self.httpProxy + ')');
 		request({
 			url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
 			headers: {
@@ -314,17 +316,17 @@ Client.prototype.checkLoginStatus = function(callback) {
 		}, function(err, res, body) {
 
 			if (!err && res.statusCode == 200) {
-				self._dlog('checkLoginStatus - Okay; Could access to WAN with proxy :)');
+				self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to WAN with proxy :)');
 				callback(true); // Logged-in to MC2wifi
 				return;
 			}
 
 			// If could not access to WAN without proxy
-			self._dlog('checkLoginStatus - Could not access to WAN with proxy!');
-			if (err != null) self._dlog('-- Details: ' + err.toString());
+			self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN with proxy!');
+			if (err != null) self.logger.dlog('mc2wifi/-', ' Details: ' + err.toString());
 
 			// Access to authentication page without proxy
-			self._dlog('checkLoginStatus - Trying to access to LAN...');
+			self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to LAN...');
 			request({
 				url: 'http://wlanlogin.mc2ed.sjn.osakac.ac.jp/',
 				timeout: self.timeout,
@@ -332,13 +334,13 @@ Client.prototype.checkLoginStatus = function(callback) {
 			}, function (err, res, body) {
 
 				if (!err && res.statusCode == 200) {
-					self._dlog('checkLoginStatus - Okay; Could access to LAN :)');
+					self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to LAN :)');
 					callback(false); // Not logged-in
 					return;
 				}
 
 				// If could not access to authentication page
-				self._dlog('checkLoginStatus - Could not access to LAN!');
+				self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to LAN!');
 				callback(null); // It maybe offline
 
 			});
@@ -357,16 +359,6 @@ Client.prototype._getRequestModule = function(str) {
 	delete require.cache[require.resolve('request')];
 	// Return a new instance
 	return require('request');
-};
-
-
-/**
-	Output of debugging log
-**/
-Client.prototype._dlog = function(str) {
-	if (this.isDebug) {
-		Helper.dlog(str);
-	}
 };
 
 
