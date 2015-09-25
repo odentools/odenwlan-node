@@ -26,9 +26,6 @@ var Client = function(options) {
 
 	// Certificate files for login processing
 	this.isCertCheck = false;
-	this.certFiles = [
-		'file://' + __dirname + '/../../cert/mcwlct1s.mc2ed.sjn.osakac.ac.jp.pem'
-	];
 
 	// Debug mode
 	this.isDebug = true;
@@ -99,7 +96,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	var cert = null;
 	if (self.isCertCheck && cert_file != null) {
 		self.logger.dlog('mc2wifi/login', 'Load certificate: ' + cert_file);
-		cert = require('fs').readFileSync(path.resolve(__dirname, '../../cert/' + cert_file));
+		cert = require('fs').readFileSync(path.resolve(__dirname, '../../certs/' + cert_file));
 	} else {
 		self.logger.dlog('mc2wifi/login', 'Not load certificate');
 	}

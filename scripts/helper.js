@@ -20,7 +20,7 @@ module.exports = {
 			height: 480,
 			show: false
 		});
-		browser_windows.worker.loadUrl('file://' + __dirname + '/../page/online-detector.html');
+		browser_windows.worker.loadUrl('file://' + __dirname + '/../pages/online-detector.html');
 	},
 
 	/**
@@ -29,7 +29,7 @@ module.exports = {
 	**/
 	initAboutWindow: function(browser_windows) {
 		if (browser_windows.about != null) {
-			browser_windows.about.loadUrl('file://' + __dirname + '/../page/about.html');
+			browser_windows.about.loadUrl('file://' + __dirname + '/../pages/about.html');
 			return;
 		}
 
@@ -43,7 +43,7 @@ module.exports = {
 		browser_windows.about.on('closed', function() {
 			browser_windows.about = null;
 		});
-		browser_windows.about.loadUrl('file://' + __dirname + '/../page/about.html');
+		browser_windows.about.loadUrl('file://' + __dirname + '/../pages/about.html');
 	},
 
 	/**
@@ -61,7 +61,7 @@ module.exports = {
 	**/
 	initPrefWindow: function(browser_windows) {
 		if (browser_windows.pref != null) {
-			browser_windows.pref.loadUrl('file://' + __dirname + '/../page/preferences.html');
+			browser_windows.pref.loadUrl('file://' + __dirname + '/../pages/preferences.html');
 			return;
 		}
 
@@ -75,7 +75,7 @@ module.exports = {
 		browser_windows.pref.on('closed', function() {
 			browser_windows.pref = null;
 		});
-		browser_windows.pref.loadUrl('file://' + __dirname + '/../page/preferences.html');
+		browser_windows.pref.loadUrl('file://' + __dirname + '/../pages/preferences.html');
 	},
 
 	/**
@@ -93,7 +93,7 @@ module.exports = {
 	**/
 	initLoggerWindow: function(browser_windows) {
 		if (browser_windows.logger != null) {
-			browser_windows.logger.loadUrl('file://' + __dirname + '/../page/logger.html');
+			browser_windows.logger.loadUrl('file://' + __dirname + '/../pages/logger.html');
 			return;
 		}
 
@@ -107,7 +107,7 @@ module.exports = {
 		browser_windows.logger.on('closed', function() {
 			browser_windows.logger = null;
 		});
-		browser_windows.logger.loadUrl('file://' + __dirname + '/../page/logger.html');
+		browser_windows.logger.loadUrl('file://' + __dirname + '/../pages/logger.html');
 	},
 
 	/**

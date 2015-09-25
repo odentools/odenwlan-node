@@ -11,12 +11,12 @@ module.exports = function(grunt) {
 				options: {
 					name: 'odenwlan',
 					dir: '.',
-					out: 'dist',
-					ignore: '(dist/|node_modules/grunt.*|\.git.*|Gruntfile\.js)',
+					out: 'dists',
+					ignore: '(dists/|node_modules/grunt.*|\.git.*|Gruntfile\.js)',
 					version: '0.29.2',
 					platform: 'linux',
 					arch: 'x64',
-					icon: 'img/icon.png',
+					icon: 'images/icon.png',
 					overwrite: true
 				}
 			},
@@ -24,12 +24,12 @@ module.exports = function(grunt) {
 				options: {
 					name: 'odenwlan',
 					dir: '.',
-					out: 'dist',
-					ignore: '(dist/|node_modules/grunt.*|\.git.*|Gruntfile\.js)',
+					out: 'dists',
+					ignore: '(dists/|node_modules/grunt.*|\.git.*|Gruntfile\.js)',
 					version: '0.29.2',
 					platform: 'win32',
 					arch: 'ia32',
-					icon: 'img/icon.png',
+					icon: 'images/icon.png',
 					overwrite: true,
 					'version-string.CompanyName': '<%= pkg.author %>',
 					'version-string.LegalCopyright': '(C) <%= pkg.author %>',

@@ -15,7 +15,7 @@ var Tray = require('tray');
 var BrowserWindow = require('browser-window');
 
 // Load helper module
-var Helper = require(__dirname + '/js/helper'); // It include static methods
+var Helper = require(__dirname + '/scripts/helper'); // It include static methods
 
 // Const values
 var STATUS_CHECK_INTERVAL = 2000; 			// Status checking works every 2 seconds
@@ -37,7 +37,7 @@ var browserWindows = {		// Instances of Browser Window
 	pref: null,				// Preferences window
 	worker: null,			// Hidden window for the online detection
 };
-var mLogger = require(__dirname + '/js/logger').getInstance(); // Logger module
+var mLogger = require(__dirname + '/scripts/logger').getInstance(); // Logger module
 mLogger.dlog('main', 'App has been started.');
 
 // Check for whether a own is development version
@@ -66,7 +66,7 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
 
 	// Make a tray icon
-	appTray = new Tray(__dirname + '/img/icon_tray_offline.png');
+	appTray = new Tray(__dirname + '/images/icon_tray_offline.png');
 	var contextMenu = Menu.buildFromTemplate([
 		{
 			label: 'odenwlan-node v' + manifest.version,
@@ -134,7 +134,7 @@ app.on('ready', function() {
 			}
 
 			// Initialize an instance of the authentication module
-			var Wifi = require(__dirname + '/js/auth/mc2wifi');
+			var Wifi = require(__dirname + '/scripts/auth/mc2wifi');
 			mAuth = new Wifi({
 				username: args.loginId,
 				password: args.loginPw,
@@ -192,7 +192,7 @@ app.on('ready', function() {
 		var now = new Date();
 		if (mAuth == null || isOnline == null || !isOnline || LOGIN_RETRY_COUNT_LIMIT <= loginRetryCount) {
 			// Change the status to offline
-			appTray.setImage(__dirname + '/img/icon_tray_offline.png');
+			appTray.setImage(__dirname + '/images/icon_tray_offline.png');
 			if (LOGIN_RETRY_COUNT_LIMIT <= loginRetryCount) { // Reached retry limit
 				appTray.setToolTip('odenwlan-node : Reached retry limit');
 			} else {
@@ -205,7 +205,7 @@ app.on('ready', function() {
 
 		} else if (conChangedAt < now.getTime() - STATUS_CHECK_LOOP_TIMEOUT) {
 			// Change the status to offline
-			appTray.setImage(__dirname + '/img/icon_tray_offline.png');
+			appTray.setImage(__dirname + '/images/icon_tray_offline.png');
 			appTray.setToolTip('odenwlan-node : Check loop was timeouted');
 			return;
 
@@ -215,9 +215,9 @@ app.on('ready', function() {
 			// Tray icon animation
 			var n = now.getSeconds() % 4;
 			if (n == 0 || n == 1) {
-				appTray.setImage(__dirname + '/img/icon_tray_wait_a.png');
+				appTray.setImage(__dirname + '/images/icon_tray_wait_a.png');
 			} else {
-				appTray.setImage(__dirname + '/img/icon_tray_wait_b.png');
+				appTray.setImage(__dirname + '/images/icon_tray_wait_b.png');
 			}
 
 			// Wait for progress
@@ -228,7 +228,7 @@ app.on('ready', function() {
 		is_processing = true;
 		mLogger.dlog('main/statusCheck', 'Checking for login status');
 		appTray.setToolTip('odenwlan-node : Checking...');
-		appTray.setImage(__dirname + '/img/icon_tray_wait_a.png'); // Change the icon to waiting
+		appTray.setImage(__dirname + '/images/icon_tray_wait_a.png'); // Change the icon to waiting
 		try {
 			mAuth.checkLoginStatus(function(login_status) {
 				mLogger.dlog('main/statusCheck', 'Login status: ' + login_status);
@@ -248,7 +248,7 @@ app.on('ready', function() {
 							// Clear the retry count
 							loginRetryCount = 0;
 							// Change the status to online
-							appTray.setImage(__dirname + '/img/icon_tray_online.png');
+							appTray.setImage(__dirname + '/images/icon_tray_online.png');
 							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
 							mLogger.ilog('main/statusCheck', 'Authenticate was successful.');
 
@@ -268,7 +268,7 @@ app.on('ready', function() {
 							// Increment the retry count
 							loginRetryCount++;
 							// Change the status to offline
-							appTray.setImage(__dirname + '/img/icon_tray_offline.png');
+							appTray.setImage(__dirname + '/images/icon_tray_offline.png');
 							appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
 							// Show the error message
 							if (error_text != null) {
@@ -293,7 +293,7 @@ app.on('ready', function() {
 					// Clear a failed count
 					loginRetryCount = 0;
 					// Change the status to online
-					appTray.setImage(__dirname + '/img/icon_tray_online.png');
+					appTray.setImage(__dirname + '/images/icon_tray_online.png');
 					appTray.setToolTip('odenwlan-node : Online');
 					// Clear the connection changed time
 					conChangedAt = -1;
