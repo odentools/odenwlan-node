@@ -2,7 +2,7 @@
 <head>
 <title>無線LAN 利用者認証ページ</title>
 <meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
-<META HTTP-EQUIV="Pragma" CONTENT="no-cache">                                 
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta http-equiv="Cache-Control" content="no-cache">
 
 <script type="text/javascript">
@@ -21,13 +21,13 @@
 	    return false;
 	  }
 	}
-	
+
 	/*URLに記載された?sip=hogehogeの文字列をformTagのactionに追記します。*/
 	function setFormAction(){
 		//function内でget引数を利用できるようにする。アクセス方法はget["キー名"]
 		get = getRequest();
 		var errmsg = "";
-		
+
 		//get["sip"]が取得できるか
 		if(get["sip"] != undefined){
 			if(get["sip"]=="172.25.250.91"){
@@ -47,7 +47,7 @@
 		if(get["auth"]=="failed"){
 			errmsg += "認証に失敗しました。</br>ユーザ名とパスワードを確認してください。</br>";
 		}
-		
+
 		//エラーメッセージを出力
 		document.getElementById("errorDisplay").innerHTML = errmsg;
 	}
@@ -134,7 +134,7 @@
 				</div>
 
 				<div id=container-menu>
-				
+
 					<div id=area>
 						<h2>無線LANの利用について</h2>
 						<div id=indent>
@@ -199,4 +199,3 @@
 
 	</body>
 </html>
-

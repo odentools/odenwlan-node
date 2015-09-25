@@ -1,4 +1,4 @@
-var path = require('path'), Logger = require('../logger'), Helper = require('../helper');
+var path = require('path'), Logger = require('../logger');
 
 /**
  * Authentication client module for MC2Wifi and MC2Phone
@@ -287,7 +287,7 @@ Client.prototype.checkLoginStatus = function(callback) {
 	}, function(err, res, body) {
 
 		if (!err && res.statusCode == 200) {
-			if (body.match(/無線LAN 利用者確認ページ/)) {
+			if (self._isAuthPageContent(body)) {
 				self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN without proxy! (Redirected to auth page)');
 				callback(false); // Not logged-in
 			} else {
@@ -345,6 +345,21 @@ Client.prototype.checkLoginStatus = function(callback) {
 		});
 
 	});
+};
+
+
+/**
+	Detect whether the page content is authentication page
+	@param content Page content
+	@return Return whether the content is authentication page
+ */
+Client.prototype._isAuthPageContent = function(content) {
+	var self = this;
+
+	if (content == null) return false;
+	if (!content.match(/無線LAN 利用者(認証|確認)ページ/)) return false;
+
+	return true;
 };
 
 
