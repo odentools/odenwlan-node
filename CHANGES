@@ -4,6 +4,7 @@ See also: https://github.com/odentools/odenwlan-node/releases
 ## v1.3.0
 * New: Debug log window
 * Change: Automated test and refactored code
+* Fix: Uncatchable errors in login check process
 
 ## v1.2.0
 * New: Auto update
