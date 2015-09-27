@@ -16,7 +16,7 @@ var Client = function(options) {
 	this.httpsProxy = 'http://172.25.250.41:8080/';
 
 	// WAN connection check url (It must be HTTP page; Don't to HTTPS)
-	this.wanOnlineCheckUrl = 'http://a.odentools.github.io/online/';
+	this.wanOnlineCheckUrl = 'http://odentools.github.io/online/';
 
 	// User-Agent string
 	this.userAgent = options.userAgent || 'odenwlan-node';
