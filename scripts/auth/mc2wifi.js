@@ -16,7 +16,7 @@ var Client = function(options) {
 	this.httpsProxy = 'http://172.25.250.41:8080/';
 
 	// WAN connection check url (It must be HTTP page; Don't to HTTPS)
-	this.wanOnlineCheckUrl = 'http://odentools.github.io/online/';
+	this.wanOnlineCheckUrl = 'http://a.odentools.github.io/online/';
 
 	// User-Agent string
 	this.userAgent = options.userAgent || 'odenwlan-node';
@@ -267,84 +267,196 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 /**
 	Check whether the user is logged-in
 	@param callback	Callback function: function(is_logged_in)
-	is_logged_in = true / false / null
+	is_logged_in: true = Online (Logged in) / false = Online (Not logged in) / null = Offline
 **/
 Client.prototype.checkLoginStatus = function(callback) {
 	var self = this;
 
-	var request = self._getRequestModule();
-	var now = new Date().getTime();
+	// Connect to WAN without proxy
+	self._execTestWANNoProxy(function(is_success, is_logged_in) {
 
-	// Access to WAN without proxy
-	self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to WAN without proxy...');
-	request({
-		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
-		headers: {
-			'User-Agent': self.userAgent
-		},
-		timeout: self.timeout,
-		proxy: null
-	}, function(err, res, body) {
-
-		if (!err && res.statusCode == 200) {
-			if (self._isAuthPageContent(body)) {
-				self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN without proxy! (Redirected to auth page)');
-				callback(false); // Not logged-in
-			} else {
-				self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to WAN without proxy :)');
-				callback(true); // Logged-in to MC2phone or Connected to other network
-			}
+		if (is_success && !is_logged_in) { // If redirected to authenticate page in intranet
+			callback(false); // Not logged in
+			return;
+		} else if (is_success) { // If could connect to WAN without proxy
+			callback(true); // Online on any network -- Logged in
 			return;
 		}
 
-		// If could not access to WAN without proxy
-		self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN without proxy!');
-		if (err != null) self.logger.dlog('mc2wifi/-', ' Details: ' + err.toString());
+		// Connect to WAN with proxy
+		self._execTestWANWithProxy(function (is_success) {
 
-		// Access to WAN with proxy
-		self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to WAN with proxy... (' + self.httpProxy + ')');
-		request({
-			url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
-			headers: {
-				'User-Agent': self.userAgent
-			},
-			timeout: self.timeout,
-			proxy: self.httpProxy
-		}, function(err, res, body) {
-
-			if (!err && res.statusCode == 200) {
-				self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to WAN with proxy :)');
-				callback(true); // Logged-in to MC2wifi
+			if (is_success) { // If could connect to WAN with proxy
+				callback(true); // Online on MC2wifi or network of labs -- Logged in
 				return;
 			}
 
-			// If could not access to WAN without proxy
-			self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to WAN with proxy!');
-			if (err != null) self.logger.dlog('mc2wifi/-', ' Details: ' + err.toString());
+			// Connect to Authenticate page of Intranet
+			self._execTestIntra(function (is_success) {
 
-			// Access to authentication page without proxy
-			self.logger.dlog('mc2wifi/checkLoginStatus', 'Trying to access to LAN...');
-			request({
-				url: 'http://wlanlogin.mc2ed.sjn.osakac.ac.jp/',
-				timeout: self.timeout,
-				proxy: null
-			}, function (err, res, body) {
-
-				if (!err && res.statusCode == 200) {
-					self.logger.dlog('mc2wifi/checkLoginStatus', 'Okay; Could access to LAN :)');
-					callback(false); // Not logged-in
+				if (is_success) { // If could connect to authentication page in intranet
+					callback(false); // Not logged in
 					return;
 				}
 
-				// If could not access to authentication page
-				self.logger.dlog('mc2wifi/checkLoginStatus', 'Could not access to LAN!');
-				callback(null); // It maybe offline
+				callback(null); // Offline
 
 			});
 
 		});
 
 	});
+
+};
+
+
+/**
+	Connect to WAN without proxy
+	@param callback	Callback function: function(is_successful, is_logged_in)
+**/
+Client.prototype._execTestWANNoProxy = function(callback) {
+
+	var self = this;
+
+	var request = self._getRequestModule();
+	var now = new Date().getTime();
+
+	// Connect to WAN page without proxy
+	self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Connect to WAN without proxy...');
+	request({
+		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
+		headers: {
+			'User-Agent': self.userAgent
+		},
+		timeout: self.timeout,
+	}, function (err, res, body) {
+
+		if (!err && res.statusCode == 200) {
+			if (self._isAuthPageContent(body)) {
+				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Redirected to auth page');
+				callback(false, false); // Not logged-in
+			} else {
+				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Successful');
+				callback(true, true); // Online
+			}
+			return;
+		}
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed');
+		}
+		callback(false, false);
+
+	})
+	.on('error', function(err) {
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed with internal error - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed with internal error');
+		}
+		callback(false, false);
+
+	});
+
+};
+
+
+/**
+	Connect to WAN with proxy
+	@param callback	Callback function: function(is_successful)
+**/
+Client.prototype._execTestWANWithProxy = function(callback) {
+
+	var self = this;
+
+	var request = self._getRequestModule();
+	var now = new Date().getTime();
+
+	// Connect to WAN page with proxy
+	self.logger.dlog('mc2wifi/_execTestWANWithProxy', 'Connect to WAN with proxy... ' + self.httpProxy);
+	request({
+		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
+		headers: {
+			'User-Agent': self.userAgent
+		},
+		timeout: self.timeout,
+		proxy: self.httpProxy
+	}, function (err, res, body) {
+
+		if (!err && res.statusCode == 200) {
+			self.logger.dlog('mc2wifi/_execTestWANWithProxy', 'Successful');
+			callback(true);
+			return;
+		}
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestWANWithProxy', 'Failed - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestWANWithProxy', 'Failed');
+		}
+		callback(false);
+
+	})
+	.on('error', function(err) {
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestWANWithProxy', 'Failed with internal error - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestWANWithProxy', 'Failed with internal error');
+		}
+		callback(false);
+
+	});
+
+};
+
+
+/**
+	Connect to authentication page of intranet in university
+	@param callback	Callback function: function(is_successful)
+**/
+Client.prototype._execTestIntra = function(callback) {
+
+	var self = this;
+
+	var request = self._getRequestModule();
+
+	// Connect to authentication page of intranet
+	self.logger.dlog('mc2wifi/_execTestIntra', 'Connect to intranet...');
+	request({
+		url: 'http://wlanlogin.mc2ed.sjn.osakac.ac.jp/',
+		timeout: self.timeout,
+		proxy: null
+	}, function (err, res, body) {
+
+		if (!err && res.statusCode == 200) {
+			self.logger.dlog('mc2wifi/_execTestIntra', 'Successful');
+			callback(false);
+			return;
+		}
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestIntra', 'Failed - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestIntra', 'Failed');
+		}
+		callback(false);
+
+	})
+	.on('error', function(err) {
+
+		if (err) {
+			self.logger.elog('mc2wifi/_execTestIntra', 'Failed with internal error - ' + err.toString());
+		} else {
+			self.logger.elog('mc2wifi/_execTestIntra', 'Failed with internal error');
+		}
+		callback(false);
+
+	});
+
 };
 
 

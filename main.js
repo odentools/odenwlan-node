@@ -226,37 +226,43 @@ app.on('ready', function() {
 
 		// Status check
 		is_processing = true;
-		mLogger.dlog('main/statusCheck', 'Checking for login status');
+		mLogger.ilog('main/checkLoop', 'Checking for login status');
 		appTray.setToolTip('odenwlan-node : Checking...');
 		appTray.setImage(__dirname + '/images/icon_tray_wait_a.png'); // Change the icon to waiting
 		try {
 			mAuth.checkLoginStatus(function(login_status) {
-				mLogger.dlog('main/statusCheck', 'Login status: ' + login_status);
 
-				if (login_status == null) { // It may be connecting now
+				if (login_status == null) { // It is offline or may be now connecting
+					mLogger.ilog('main/checkLoop', 'Status: Offline :(');
 					is_processing = false;
 					return;
 				}
 
 				if (!login_status) {
+					mLogger.ilog('main/checkLoop', 'Status: Not logged in :(');
+
 					// Login
-					mLogger.dlog('main/statusCheck', 'Trying to login (' + loginRetryCount + ')');
+					mLogger.ilog('main/checkLoop', 'Trying to login (' + loginRetryCount + ')');
 					appTray.setToolTip('odenwlan-node : Trying to login...');
 					mAuth.login(function(is_successful, error_text) {
 
 						if (is_successful) { // Authentication was successful
+
+							mLogger.ilog('main/checkLoop', 'Authentication result: Successful');
+
 							// Clear the retry count
 							loginRetryCount = 0;
 							// Change the status to online
 							appTray.setImage(__dirname + '/images/icon_tray_online.png');
 							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
-							mLogger.ilog('main/statusCheck', 'Authenticate was successful.');
 
 						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
+
+							mLogger.ilog('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
+
 							// Don't retry
 							loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
 							// Show a message
-							mLogger.elog('main/statusCheck', 'Authenticate was failed; Invalid id or password.');
 							require('dialog').showMessageBox(null, {
 								type: 'info',
 								title: 'Authenticate was failed',
@@ -265,21 +271,22 @@ app.on('ready', function() {
 							});
 
 						} else { // Other error (e.g. Network error)
+
+							// Show the error message
+							if (error_text != null) {
+								mLogger.ilog('main/checkLoop', 'Authentication result: Failed - ' + error_text);
+							} else {
+								mLogger.ilog('main/checkLoop', 'Authentication result: Failed');
+							}
+
 							// Increment the retry count
 							loginRetryCount++;
 							// Change the status to offline
 							appTray.setImage(__dirname + '/images/icon_tray_offline.png');
 							appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
-							// Show the error message
-							if (error_text != null) {
-								mLogger.elog('main/statusCheck', 'Authenticate was failed; ' + error_text);
-							} else {
-								mLogger.elog('main/statusCheck', 'Authenticate was failed; Unknown error.');
-							}
 
 						}
 
-						mLogger.dlog('main/statusCheck', 'Login result: ' + is_successful);
 						// Processing was done
 						is_processing = false;
 
@@ -289,7 +296,8 @@ app.on('ready', function() {
 					});
 
 				} else {
-					mLogger.dlog('main/statusCheck', 'Already logged-in :)');
+					mLogger.ilog('main/checkLoop', 'Status: Online on any network :)');
+
 					// Clear a failed count
 					loginRetryCount = 0;
 					// Change the status to online
@@ -307,7 +315,7 @@ app.on('ready', function() {
 			});
 
 		} catch (e) {
-			mLogger.dlog('main/statusCheck', e.toString());
+			mLogger.dlog('main/checkLoop', e.toString());
 			is_processing = false;
 		}
 
