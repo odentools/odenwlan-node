@@ -352,12 +352,13 @@ Client.prototype._execTestWANNoProxy = function(callback) {
 		rejectUnauthorized: false
 	}, function (err, res, body) {
 
-		if (res && res.statusCode == 200) { // Success
-			self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Successful');
-			callback(true, true); // Online
-			return;
-		} else if (res && res.statusCode == 301 || res.statusCode == 302) { // Redirect
-			if (self._getAuthSubmitBaseUrlByRedirectedUrl(res.headers.location) != null) {
+		if (res) {
+			if (res.statusCode == 200) { // Success
+				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Successful');
+				callback(true, true); // Online
+				return;
+			} else if ((res.statusCode == 301 || res.statusCode == 302)
+				&& self._getAuthSubmitBaseUrlByRedirectedUrl(res.headers.location)) { // Redirect
 				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Redirected to auth page');
 				callback(false, false); // Not logged-in
 				return;
@@ -411,7 +412,7 @@ Client.prototype._execTestWANWithProxy = function(callback) {
 		proxy: self.httpProxy
 	}, function (err, res, body) {
 
-		if (!err && res.statusCode == 200) {
+		if (!err && res && res.statusCode == 200) {
 			self.logger.dlog('mc2wifi/_execTestWANWithProxy', 'Successful');
 			callback(true);
 			return;
@@ -457,7 +458,7 @@ Client.prototype._execTestIntra = function(callback) {
 		proxy: null
 	}, function (err, res, body) {
 
-		if (!err && res.statusCode == 200) {
+		if (!err && res && res.statusCode == 200) {
 			self.logger.dlog('mc2wifi/_execTestIntra', 'Successful');
 			callback(true);
 			return;
