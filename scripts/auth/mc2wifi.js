@@ -41,6 +41,7 @@ var Client = function(options) {
 	@param callback	Callback function: function(is_successful, [error_text])
 **/
 Client.prototype.login = function(callback) {
+
 	var http = require('http');
 	var self = this;
 
@@ -68,6 +69,7 @@ Client.prototype.login = function(callback) {
 		self.logger.elog('mc2wifi/login', 'Internal error occured (ignored): ' + err);
 		callback(false, '1st request was failed');
 	});
+
 };
 
 
@@ -78,15 +80,13 @@ Client.prototype.login = function(callback) {
 	@param callback	Callback function: function(is_successful, [error_text])
 **/
 Client.prototype._loginSecondRequest = function(url, callback) {
+
 	var self = this;
 
 	// Get the sip parameter
-	var base_url = null;
-	var cert_file = null;
-	if (url.match(/mcwlct1s\.mc2ed\.sjn\.osakac\.ac\.jp/)) {
-		base_url = 'https://mcwlct1s.mc2ed.sjn.osakac.ac.jp:9998';
-		cert_file = 'mcwlct1s.mc2ed.sjn.osakac.ac.jp.pem';
-	} else {
+	var base_url = self._getAuthSubmitBaseUrlByRedirectedUrl(url) || null;
+	var cert_file = null; // Certiticate check is disabled for now
+	if (base_url == null) {
 		// Abort
 		callback(false, 'Unknown 2nd URL: ' + url);
 		return;
@@ -158,6 +158,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	@param callback	Callback function: function(is_successful, [error_text])
 **/
 Client.prototype._requestRedirectLoop = function(url, base_url, callback, count) {
+
 	var self = this;
 
 	if (count == null) {
@@ -200,6 +201,7 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 		}
 
 	});
+
 };
 
 
@@ -209,6 +211,7 @@ Client.prototype._requestRedirectLoop = function(url, base_url, callback, count)
 	@param base_url Base URL for the redirect by relative path
 **/
 Client.prototype._requestIncludeResources = function(body, base_url) {
+
 	var self = this;
 
 	var img_url = null;
@@ -241,6 +244,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 			self.logger.dlog('mc2wifi/_requestIncludeResources', 'Result: ' + res.statusLine);
 		}
 	});
+
 };
 
 
@@ -250,6 +254,7 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 	@param base_url Base URL for the redirect by relative path
 **/
 Client.prototype._getJsRedirectUrl = function(body, base_url) {
+
 	var self = this;
 
 	var redirect_url = null;
@@ -261,6 +266,7 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 		self.logger.dlog('mc2wifi/_getJsRedirectUrl', 'Detect JS Redirect(B): ' + redirect_url);
 	}
 	return redirect_url;
+
 };
 
 
@@ -270,6 +276,7 @@ Client.prototype._getJsRedirectUrl = function(body, base_url) {
 	is_logged_in: true = Online (Logged in) / false = Online (Not logged in) / null = Offline
 **/
 Client.prototype.checkLoginStatus = function(callback) {
+
 	var self = this;
 
 	// Connect to WAN without proxy
@@ -319,33 +326,51 @@ Client.prototype._execTestWANNoProxy = function(callback) {
 	var self = this;
 
 	var request = self._getRequestModule();
+
+	// Make a request url
 	var now = new Date().getTime();
+	var url = self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now;
+
+	// Get the host name to make a camelized header.
+	// Because transparent proxy expected camelized string to HTTP header name,
+	// but request module will using lower case in default.
+	var req_host = require('url').parse(url).hostname;
 
 	// Connect to WAN page without proxy
 	self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Connect to WAN without proxy...');
 	request({
-		url: self.wanOnlineCheckUrl + '?action=check-wan-connection&t=' + now,
+		url: url,
 		headers: {
-			'User-Agent': self.userAgent
+			'User-Agent': self.userAgent,
+			'Host': req_host // Host header; It must be indicated with camelize case.
 		},
 		timeout: self.timeout,
+		proxy: null,
+		strictSSL: false,
+		followRedirect: false,
+		followAllRedirects: false,
+		rejectUnauthorized: false
 	}, function (err, res, body) {
 
-		if (!err && res.statusCode == 200) {
-			if (self._isAuthPageContent(body)) {
+		if (res && res.statusCode == 200) { // Success
+			self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Successful');
+			callback(true, true); // Online
+			return;
+		} else if (res && res.statusCode == 301 || res.statusCode == 302) { // Redirect
+			if (self._getAuthSubmitBaseUrlByRedirectedUrl(res.headers.location) != null) {
 				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Redirected to auth page');
 				callback(false, false); // Not logged-in
-			} else {
-				self.logger.dlog('mc2wifi/_execTestWANNoProxy', 'Successful');
-				callback(true, true); // Online
+				return;
 			}
-			return;
 		}
 
 		if (err) {
 			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed - ' + err.toString());
 		} else {
 			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed');
+		}
+		if (res) {
+			self.logger.elog('mc2wifi/_execTestWANNoProxy', 'Failed - Response: ' + res.statusCode);
 		}
 		callback(false, false);
 
@@ -407,7 +432,7 @@ Client.prototype._execTestWANWithProxy = function(callback) {
 		} else {
 			self.logger.elog('mc2wifi/_execTestWANWithProxy', 'Failed with internal error');
 		}
-		callback(false);
+		//callback(false);
 
 	});
 
@@ -434,7 +459,7 @@ Client.prototype._execTestIntra = function(callback) {
 
 		if (!err && res.statusCode == 200) {
 			self.logger.dlog('mc2wifi/_execTestIntra', 'Successful');
-			callback(false);
+			callback(true);
 			return;
 		}
 
@@ -453,7 +478,7 @@ Client.prototype._execTestIntra = function(callback) {
 		} else {
 			self.logger.elog('mc2wifi/_execTestIntra', 'Failed with internal error');
 		}
-		callback(false);
+		//callback(false);
 
 	});
 
@@ -461,28 +486,46 @@ Client.prototype._execTestIntra = function(callback) {
 
 
 /**
-	Detect whether the page content is authentication page
-	@param content Page content
-	@return Return whether the content is authentication page
+	Get a base url for submission of authentication informations from redirected url
+	@param url An url which redirected from general page on WAN by transparent proxy
+	@return Return a url
  */
-Client.prototype._isAuthPageContent = function(content) {
+Client.prototype._getAuthSubmitBaseUrlByRedirectedUrl = function(url) {
+
 	var self = this;
 
-	if (content == null) return false;
-	if (!content.match(/無線LAN 利用者(認証|確認)ページ/)) return false;
+	if (url.match(/mcwlct(\d+)s\.mc2ed\.sjn\.osakac\.ac\.jp/)) {
+		return 'https://mcwlct' + RegExp.$1 + 's.mc2ed.sjn.osakac.ac.jp:9998';
+	}
 
-	return true;
+	return null;
+
+};
+
+
+/**
+	Get a new instance of the get module
+**/
+Client.prototype._getHttpModule = function() {
+
+	// Clear a cache of the http module
+	delete require.cache[require.resolve('http')];
+	// Return a new instance
+	return require('http');
+
 };
 
 
 /**
 	Get a new instance of the request module
 **/
-Client.prototype._getRequestModule = function(str) {
+Client.prototype._getRequestModule = function() {
+
 	// Clear a cache of the request module
 	delete require.cache[require.resolve('request')];
 	// Return a new instance
 	return require('request');
+
 };
 
 
