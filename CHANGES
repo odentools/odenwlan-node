@@ -1,6 +1,9 @@
 # Change log of odenwlan-node
 See also: https://github.com/odentools/odenwlan-node/releases
 
+## v1.4.0
+* New: Automatic restart for when an uncaught exception occurred
+
 ## v1.3.0
 * New: Debug log window
 * Change: Automated test and refactored code

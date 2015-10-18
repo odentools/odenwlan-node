@@ -1,6 +1,6 @@
 {
   "name": "odenwlan-node",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "An automatic login tool for Wi-Fi of OECU",
   "main": "main.js",
   "scripts": {
