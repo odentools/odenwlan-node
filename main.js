@@ -50,6 +50,12 @@ process.argv.forEach(function(element, index, array) {
 	}
 });
 
+// Set a catcher for uncaught exceptions
+process.on('uncaughtException', function (error) {
+	mLogger.elog('main', 'An uncaught exception occured!\n' + error.toString());
+	if (!isDebug && Helper) Helper.restartApp();
+});
+
 // Read a manifest of the app
 var manifest = require('./package.json');
 
@@ -100,7 +106,7 @@ app.on('ready', function() {
 				appTray.destroy();
 				app.quit();
 			}
-		},
+		}
 	]);
 	appTray.setContextMenu(contextMenu);
 	appTray.setToolTip('odenwlan-node');

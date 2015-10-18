@@ -180,6 +180,40 @@ module.exports = {
 				mLogger.ilog('helper/execAutoUpdate', 'Update successful: v' + version_str + ' (already latest)');
 			}
 		});
+	},
+
+	/**
+		Restart the application
+	**/
+	restartApp: function() {
+
+		var app = require('app'),
+			child_process = require('child_process'),
+			mLogger = Logger.getInstance();
+
+		// Get the command and parameters of myself
+		var argv = process.argv.concat(); // Copy the arguments array
+		var cmd = argv.shift();
+
+		// Start the new app
+		mLogger.dlog('helper/restartApp', 'Start the cmd: ' + cmd);
+		var child = null;
+		try {
+			child = child_process.spawn(cmd, argv, {
+				detached: true,
+				stdio: [ 'ignore', 'ignore', 'ignore' ]
+			});
+			child.unref();
+		} catch (e) {
+			mLogger.elog('helper/restartApp', e.toString());
+			return;
+		}
+
+		// Quit myself
+		var timer = setTimeout(function() {
+			process.exit(0);
+		}, 1000);
+
 	}
 
 };
