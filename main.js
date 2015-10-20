@@ -37,22 +37,22 @@ var browserWindows = {		// Instances of Browser Window
 	pref: null,				// Preferences window
 	worker: null,			// Hidden window for the online detection
 };
-var mLogger = require(__dirname + '/scripts/logger').getInstance(); // Logger module
-mLogger.dlog('main', 'App has been started.');
+var mLogger = require('onmem-logger').getInstance(); // Logger module
+mLogger.debug('main', 'App has been started.');
 
 // Check for whether a own is development version
 process.argv.forEach(function(element, index, array) {
 	if (element.match(/^--env=(.+)$/) && RegExp.$1 == 'development') {
 		isUpdaterDryRun = true;
 		isDebug = true;
-		mLogger.ilog('main', 'Detected the development environment!'
+		mLogger.info('main', 'Detected the development environment!'
 			+ ' -- Debug logging is enabled and Updater is dry-run mode.');
 	}
 });
 
 // Set a catcher for uncaught exceptions
 process.on('uncaughtException', function (error) {
-	mLogger.elog('main', 'An uncaught exception occured!\n' + error.stack.toString);
+	mLogger.error('main', 'An uncaught exception occured!\n' + error.stack);
 	if (!isDebug && Helper) Helper.restartApp();
 });
 
@@ -118,7 +118,7 @@ app.on('ready', function() {
 
 	// Check the current preferences
 	ipc.on('fetch-preferences', function(event, args) {
-		mLogger.dlog('main/IPC.on', 'fetch-preferences');
+		mLogger.debug('main/IPC.on', 'fetch-preferences');
 		if (args.loginId == null || args.loginPw == null) {
 			// First setup
 			require('dialog').showMessageBox(null, {
@@ -136,7 +136,7 @@ app.on('ready', function() {
 					if (debug_str.length != 0) debug_str = debug_str + '\n';
 					debug_str += key + ' = ' + args[key];
 				}
-				mLogger.dlog('main', 'Debug mode is enabled; Preferences: \n' + debug_str);
+				mLogger.debug('main', 'Debug mode is enabled; Preferences: \n' + debug_str);
 			}
 
 			// Initialize an instance of the authentication module
@@ -180,7 +180,7 @@ app.on('ready', function() {
 
 	// Make a browser for the online detection
 	ipc.on('online-status-changed', function(event, args) {
-		mLogger.dlog('main/IPC.on', 'online-status-changed - ' + args.isOnline);
+		mLogger.debug('main/IPC.on', 'online-status-changed - ' + args.isOnline);
 		if (isOnline == null || args.isOnline != isOnline) { // Changed to online
 			// Set a now time to the connection changed time
 			conChangedAt = new Date().getTime();
@@ -232,29 +232,29 @@ app.on('ready', function() {
 
 		// Status check
 		is_processing = true;
-		mLogger.ilog('main/checkLoop', 'Checking for login status');
+		mLogger.info('main/checkLoop', 'Checking for login status');
 		appTray.setToolTip('odenwlan-node : Checking...');
 		appTray.setImage(__dirname + '/images/icon_tray_wait_a.png'); // Change the icon to waiting
 		try {
 			mAuth.checkLoginStatus(function(login_status) {
 
 				if (login_status == null) { // It is offline or may be now connecting
-					mLogger.ilog('main/checkLoop', 'Status: Offline :(');
+					mLogger.info('main/checkLoop', 'Status: Offline :(');
 					is_processing = false;
 					return;
 				}
 
 				if (!login_status) {
-					mLogger.ilog('main/checkLoop', 'Status: Not logged in :(');
+					mLogger.info('main/checkLoop', 'Status: Not logged in :(');
 
 					// Login
-					mLogger.ilog('main/checkLoop', 'Trying to login (' + loginRetryCount + ')');
+					mLogger.info('main/checkLoop', 'Trying to login (' + loginRetryCount + ')');
 					appTray.setToolTip('odenwlan-node : Trying to login...');
 					mAuth.login(function(is_successful, error_text) {
 
 						if (is_successful) { // Authentication was successful
 
-							mLogger.ilog('main/checkLoop', 'Authentication result: Successful');
+							mLogger.info('main/checkLoop', 'Authentication result: Successful');
 
 							// Clear the retry count
 							loginRetryCount = 0;
@@ -264,7 +264,7 @@ app.on('ready', function() {
 
 						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
 
-							mLogger.ilog('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
+							mLogger.info('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
 
 							// Don't retry
 							loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
@@ -280,9 +280,9 @@ app.on('ready', function() {
 
 							// Show the error message
 							if (error_text != null) {
-								mLogger.ilog('main/checkLoop', 'Authentication result: Failed - ' + error_text);
+								mLogger.info('main/checkLoop', 'Authentication result: Failed - ' + error_text);
 							} else {
-								mLogger.ilog('main/checkLoop', 'Authentication result: Failed');
+								mLogger.info('main/checkLoop', 'Authentication result: Failed');
 							}
 
 							// Increment the retry count
@@ -302,7 +302,7 @@ app.on('ready', function() {
 					});
 
 				} else {
-					mLogger.ilog('main/checkLoop', 'Status: Online on any network :)');
+					mLogger.info('main/checkLoop', 'Status: Online on any network :)');
 
 					// Clear a failed count
 					loginRetryCount = 0;
@@ -321,7 +321,7 @@ app.on('ready', function() {
 			});
 
 		} catch (e) {
-			mLogger.dlog('main/checkLoop', e.toString());
+			mLogger.debug('main/checkLoop', e.toString());
 			is_processing = false;
 		}
 

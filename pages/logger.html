@@ -16,25 +16,22 @@
 
 			var logItems = [];
 
-
 			/**
 			 * Copy an logs to clipboard
 			 */
 			function copyReceivedLogs(opt_label_elem) {
 
-				var log_str = new String(), num_of_rows = logItems.length;
+				var log_str = new String(), num_of_items = logItems.length;
 
-				for (var i = 0; i < num_of_rows; i++) {
-					var row = logItems[i];
-
+				for (var i = 0; i < num_of_items; i++) {
 					if (0 < log_str.length) log_str += '\n';
-					log_str += '[' + row.typeInitial + ' ' + row.createdTimeStr + '] ' + row.tag + ' / ' + row.text;
+					log_str += logItems[i].string;
 				}
 
 				require('clipboard').writeText(log_str);
 
 				if (opt_label_elem != null) {
-					opt_label_elem.innerText = 'Copied ' + num_of_rows + ' rows :)';
+					opt_label_elem.innerText = 'Copied ' + num_of_items + ' items :)';
 					window.setTimeout(function() {
 						opt_label_elem.innerText = 'Copy to clipboard';
 					}, 1000);
@@ -52,57 +49,43 @@
 				var e_logs = document.getElementById('logs');
 
 				for (var i = 0, l = log_items.length; i < l; i++) {
-					var row = log_items[i];
-					var e_row = document.createElement('tr');
+					var item = log_items[i];
+					var e_item = document.createElement('tr');
 
 					// Type of log
 					var e_type = document.createElement('td');
 					e_type.className = 'log-type';
-					e_type.innerText = row.typeInitial;
-					if (row.type == 'warn') {
-						e_row.className = 'warning';
-					} else if (row.type == 'error') {
-						e_row.className = 'danger';
-					} else if (row.type == 'info') {
-						e_row.className = 'info';
+					e_type.innerText = item.typeInitial;
+					if (item.type == 'warn') {
+						e_item.className = 'warning';
+					} else if (item.type == 'error') {
+						e_item.className = 'danger';
+					} else if (item.type == 'info') {
+						e_item.className = 'info';
 					}
-					e_row.appendChild(e_type);
+					e_item.appendChild(e_type);
 
 					// Created time
 					var e_created_at = document.createElement('td');
 					e_created_at.className = 'log-created-at';
-					e_created_at.innerText = row.createdTimeStr;
-					e_row.appendChild(e_created_at);
+					e_created_at.innerText = item.createdTimeStr;
+					e_item.appendChild(e_created_at);
 
 					// Tag of log
 					var e_tag = document.createElement('td');
 					e_type.className = 'log-tag';
-					e_tag.innerText = row.tag;
-					e_row.appendChild(e_tag);
+					e_tag.innerText = item.tag;
+					e_item.appendChild(e_tag);
 
 					// Text of log
 					var e_text = document.createElement('td');
 					e_type.className = 'log-text';
-					e_text.innerText = row.text;
-					e_row.appendChild(e_text);
+					e_text.innerText = item.text;
+					e_item.appendChild(e_text);
 
-					// Insert an row
-					e_logs.appendChild(e_row);
+					// Insert an item
+					e_logs.appendChild(e_item);
 				}
-
-			};
-
-
-			/**
-			 * Zero padding of number
-			 * Thanks: http://qiita.com/_shimizu/items/2cb49daf2eb8ffb30690
-			 * @param  {Number} number Number
-			 * @param  {Number} digit  Digit of number
-			 * @return {String} Number string with zero padding
-			 */
-			function zeroPadding(number, digit) {
-
-				return (Array(digit).join('0') + number).slice(-digit);
 
 			};
 
@@ -114,17 +97,6 @@
 			 * @param  {IPC} 'ipc' IPC module of Electron
 			 */
 			require('ipc').on('send-logs', function(log_items) {
-
-				// Format the logs
-				for (var i = 0, l = log_items.length; i < l; i++) {
-					var row = log_items[i];
-					// Initial of type -- e.g. debug -> D
-					row.typeInitial = (row.type != null) ? row.type.toString().substr(0, 1).toUpperCase() : '?';
-					// Created time
-					var created_at = new Date(row.createdAt);
-					row.createdTimeStr = zeroPadding(created_at.getHours(), 2) + ':' + zeroPadding(created_at.getMinutes(), 2)
-						+ ':' + zeroPadding(created_at.getSeconds(), 2);
-				}
 
 				logItems = log_items;
 

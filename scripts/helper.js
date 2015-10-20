@@ -1,4 +1,4 @@
-var BrowserWindow = require('browser-window'), Logger = require('./logger');
+var BrowserWindow = require('browser-window'), Logger = require('onmem-logger');
 
 /**
  * An helper which include static methods
@@ -119,7 +119,8 @@ module.exports = {
 		this.initLoggerWindow(browser_windows);
 		browser_windows.logger.show();
 		setTimeout(function() {
-			browser_windows.logger.webContents.send('send-logs', logger_instance.getLogs());
+			// Send a serialized logs to Debug log window (logger.html)
+			browser_windows.logger.webContents.send('send-logs', logger_instance.getSerializedLogs());
 		}, 500);
 	},
 
@@ -166,18 +167,18 @@ module.exports = {
 		var mLogger = Logger.getInstance();
 
 		if (updater == null) {
-			mLogger.wlog('helper/execAutoUpdate', 'updater is null!');
+			mLogger.warn('helper/execAutoUpdate', 'updater is null!');
 			return;
 		}
 
 		// Check whether there is newer version and update myself
 		updater.checkAndUpdate(function(is_successful, is_available, version_str, error_str) {
 			if (error_str) {
-				mLogger.elog('helper/execAutoUpdate', 'Update check failed: ' + error_str);
+				mLogger.error('helper/execAutoUpdate', 'Update check failed: ' + error_str);
 			} else if (is_successful && is_available) {
-				mLogger.ilog('helper/execAutoUpdate', 'Update successful: v' + version_str);
+				mLogger.info('helper/execAutoUpdate', 'Update successful: v' + version_str);
 			} else if (!is_available) {
-				mLogger.ilog('helper/execAutoUpdate', 'Update successful: v' + version_str + ' (already latest)');
+				mLogger.info('helper/execAutoUpdate', 'Update successful: v' + version_str + ' (already latest)');
 			}
 		});
 	},
@@ -196,7 +197,7 @@ module.exports = {
 		var cmd = argv.shift();
 
 		// Start the new app
-		mLogger.dlog('helper/restartApp', 'Start the cmd: ' + cmd);
+		mLogger.debug('helper/restartApp', 'Start the cmd: ' + cmd);
 		var child = null;
 		try {
 			child = child_process.spawn(cmd, argv, {
@@ -205,7 +206,7 @@ module.exports = {
 			});
 			child.unref();
 		} catch (e) {
-			mLogger.elog('helper/restartApp', e.toString());
+			mLogger.error('helper/restartApp', e.toString());
 			return;
 		}
 
