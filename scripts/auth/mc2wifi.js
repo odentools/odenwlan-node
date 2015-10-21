@@ -383,7 +383,6 @@ Client.prototype._execTestWANNoProxy = function(callback) {
 		} else {
 			self.logger.error('mc2wifi/_execTestWANNoProxy', 'Failed with internal error');
 		}
-		callback(false, false);
 
 	});
 
@@ -433,7 +432,6 @@ Client.prototype._execTestWANWithProxy = function(callback) {
 		} else {
 			self.logger.error('mc2wifi/_execTestWANWithProxy', 'Failed with internal error');
 		}
-		//callback(false);
 
 	});
 
@@ -479,7 +477,6 @@ Client.prototype._execTestIntra = function(callback) {
 		} else {
 			self.logger.error('mc2wifi/_execTestIntra', 'Failed with internal error');
 		}
-		//callback(false);
 
 	});
 

@@ -1,6 +1,10 @@
 # Change log
 See also: https://github.com/odentools/odenwlan-node/releases
 
+## v1.4.2
+* Fix: An behavior of update is improved
+*
+
 ## v1.4.1
 * Fix: Improved debugging logger
 
