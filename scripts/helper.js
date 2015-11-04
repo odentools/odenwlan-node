@@ -6,6 +6,101 @@ var BrowserWindow = require('browser-window'), Logger = require('onmem-logger');
 module.exports = {
 
 	/**
+		Initialize the authentication module
+	**/
+	initAuthModule: function(app_preferences, app_manifest, is_debug_logging) {
+
+		var Wifi = require(__dirname + '/auth/mc2wifi');
+		var auth = new Wifi({
+			username: app_preferences.loginId,
+			password: app_preferences.loginPw,
+			userAgent: 'odenwlan-node/v' + app_manifest.version,
+			isDebug: is_debug_logging
+		});
+		return auth;
+
+	},
+
+	/**
+		Initialize the updater module
+	**/
+	initUpdaterModule: function(app_preferences, app_manifest, browser_windows, is_debug_logging, is_development) {
+
+		var Helper = this;
+
+		var Updater = require('electron-updater-gh-releases');
+		var updater = new Updater({
+			appVersion: app_manifest.version,
+			execFileName: 'odenwlan',
+			releaseFileNamePrefix: 'odenwlan-',
+			userAgent: 'odenwlan-node/v' + app_manifest.version,
+			ghAccountName: 'odentools',
+			ghRepoName: 'odenwlan-node',
+			isDebug: is_debug_logging,
+			isDryRun: is_development,
+			updateCheckInterval: 60 * 60 * 12 * 1000, // 12 hours
+			updateCheckedAt: app_preferences.updateCheckedAt || 0,
+			funcSaveUpdateCheckdAt: function(epoch_msec) {
+				Helper.savePref(browser_windows, 'updateCheckedAt', epoch_msec);
+			}
+		});
+		return updater;
+
+	},
+
+	/**
+		Initialize the tray icon
+	**/
+	initTrayIcon: function(app, app_manifest, browser_windows, logger) {
+
+		var Helper = this;
+		var Tray = require('tray'), Menu = require('menu');
+
+		var icon_path = require('path').resolve(__dirname + '/../images/icon_tray_offline.png');
+		var tray = new Tray(icon_path);
+
+		var contextMenu = Menu.buildFromTemplate([
+			{
+				label: 'odenwlan-node v' + app_manifest.version,
+				enabled: false
+			},
+			{
+				label: 'About',
+				click: function() {
+					Helper.showAboutWindow(browser_windows);
+				}
+			},
+			{
+				label: 'Debug log',
+				click: function() {
+					Helper.showLoggerWindow(browser_windows, logger);
+				}
+			},
+			{
+				type: 'separator'
+			},
+			{
+				label: 'Preferences',
+				click: function() {
+					Helper.showPrefWindow(browser_windows);
+				}
+			},
+			{
+				label: 'Quit',
+				accelerator: 'Command+Q',
+				click: function(){
+					tray.destroy();
+					app.quit();
+				}
+			}
+		]);
+		tray.setContextMenu(contextMenu);
+		tray.setToolTip('odenwlan-node');
+		return tray;
+
+	},
+
+	/**
 		Initialize the hidden window for worker
 		@param browser_windows	Associative array of BrowserWindow
 	**/
@@ -90,8 +185,9 @@ module.exports = {
 	/**
 		Initialize the logger window
 		@param browser_windows	Associative array of BrowserWindow
+		@param logger_instance	Logger instance
 	**/
-	initLoggerWindow: function(browser_windows) {
+	initLoggerWindow: function(browser_windows, logger_instance) {
 		if (browser_windows.logger != null) {
 			browser_windows.logger.loadUrl('file://' + __dirname + '/../pages/logger.html');
 			return;
@@ -108,6 +204,10 @@ module.exports = {
 			browser_windows.logger = null;
 		});
 		browser_windows.logger.loadUrl('file://' + __dirname + '/../pages/logger.html');
+		browser_windows.logger.webContents.on('did-finish-load', function() {
+			// Send a serialized logs to Debug log window (logger.html)
+			browser_windows.logger.webContents.send('send-logs', logger_instance.getSerializedLogs());
+		});
 	},
 
 	/**
@@ -116,12 +216,8 @@ module.exports = {
 		@param logger_instance	Logger instance
 	**/
 	showLoggerWindow: function(browser_windows, logger_instance) {
-		this.initLoggerWindow(browser_windows);
+		this.initLoggerWindow(browser_windows, logger_instance);
 		browser_windows.logger.show();
-		setTimeout(function() {
-			// Send a serialized logs to Debug log window (logger.html)
-			browser_windows.logger.webContents.send('send-logs', logger_instance.getSerializedLogs());
-		}, 500);
 	},
 
 	/**

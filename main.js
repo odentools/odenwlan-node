@@ -10,8 +10,6 @@
 var app = require('app');
 
 // Load modules for desktop environments
-var Menu = require('menu');
-var Tray = require('tray');
 var BrowserWindow = require('browser-window');
 
 // Load helper module
@@ -26,8 +24,7 @@ var LOGIN_RETRY_COUNT_LIMIT = 8;			// Retry count limit for login
 var ipc = require('ipc'); 	// IPC module
 var mAuth = null;			// Authentication module
 var mUpdater = null;		// Updater module for auto updating of app
-var isUpdaterDryRun = false;// Dry-run mode for Updater
-var isDebug = false;		// Debug logging mode
+var isDevMode = false;		// Development mode
 var isOnline = null;		// Connection status
 var conChangedAt = -1;		// Epoch-time that connection has been changed (It will reset sometime )
 var loginRetryCount = 0;	// Failed count of login processing
@@ -37,14 +34,15 @@ var browserWindows = {		// Instances of Browser Window
 	pref: null,				// Preferences window
 	worker: null,			// Hidden window for the online detection
 };
-var mLogger = require('onmem-logger').getInstance(); // Logger module
+
+// Start logging
+var mLogger = require('onmem-logger').getInstance();
 mLogger.debug('main', 'App has been started.');
 
 // Check for whether a own is development version
 process.argv.forEach(function(element, index, array) {
 	if (element.match(/^--env=(.+)$/) && RegExp.$1 == 'development') {
-		isUpdaterDryRun = true;
-		isDebug = true;
+		isDevMode = true;
 		mLogger.info('main', 'Detected the development environment!'
 			+ ' -- Debug logging is enabled and Updater is dry-run mode.');
 	}
@@ -53,15 +51,14 @@ process.argv.forEach(function(element, index, array) {
 // Set a catcher for uncaught exceptions
 process.on('uncaughtException', function (error) {
 	mLogger.error('main', 'An uncaught exception occured!\n' + error.stack);
-	if (!isDebug && Helper) Helper.restartApp();
+	if (!isDevMode && Helper) Helper.restartApp();
 });
 
 // Read a manifest of the app
 var manifest = require('./package.json');
 
 // Do self test if needed
-var Updater = require('electron-updater-gh-releases');
-Updater.doSelfTestIfNeeded();
+require('electron-updater-gh-releases').doSelfTestIfNeeded();
 
 // Don't exit the app when the window closed
 app.on('window-all-closed', function() {
@@ -71,45 +68,8 @@ app.on('window-all-closed', function() {
 // This method will be called when Electron has done initialization
 app.on('ready', function() {
 
-	// Make a tray icon
-	appTray = new Tray(__dirname + '/images/icon_tray_offline.png');
-	var contextMenu = Menu.buildFromTemplate([
-		{
-			label: 'odenwlan-node v' + manifest.version,
-			enabled: false
-		},
-		{
-			label: 'About',
-			click: function() {
-				Helper.showAboutWindow(browserWindows);
-			}
-		},
-		{
-			label: 'Debug log',
-			click: function() {
-				Helper.showLoggerWindow(browserWindows, mLogger);
-			}
-		},
-		{
-			type: 'separator'
-		},
-		{
-			label: 'Preferences',
-			click: function() {
-				Helper.showPrefWindow(browserWindows);
-			}
-		},
-		{
-			label: 'Quit',
-			accelerator: 'Command+Q',
-			click: function(){
-				appTray.destroy();
-				app.quit();
-			}
-		}
-	]);
-	appTray.setContextMenu(contextMenu);
-	appTray.setToolTip('odenwlan-node');
+	// Initialize a tray icon
+	appTray = Helper.initTrayIcon(app, manifest, browserWindows, mLogger);
 	appTray.on('clicked', function() {
 		// Reset variables in order to login immediately
 		conChangedAt = new Date().getTime();
@@ -118,7 +78,9 @@ app.on('ready', function() {
 
 	// Check the current preferences
 	ipc.on('fetch-preferences', function(event, args) {
+
 		mLogger.debug('main/IPC.on', 'fetch-preferences');
+
 		if (args.loginId == null || args.loginPw == null) {
 			// First setup
 			require('dialog').showMessageBox(null, {
@@ -129,8 +91,9 @@ app.on('ready', function() {
 			});
 			Helper.showPrefWindow(browserWindows);
 		} else {
-			// Debug
-			if (isDebug) {
+			// Debug logging
+			var is_debug_logging = isDevMode || args.isDebug || false;
+			if (is_debug_logging) {
 				var debug_str = '';
 				for (var key in args) {
 					if (debug_str.length != 0) debug_str = debug_str + '\n';
@@ -140,45 +103,30 @@ app.on('ready', function() {
 			}
 
 			// Initialize an instance of the authentication module
-			var Wifi = require(__dirname + '/scripts/auth/mc2wifi');
-			mAuth = new Wifi({
-				username: args.loginId,
-				password: args.loginPw,
-				userAgent: 'odenwlan-node/v' + manifest.version,
-				isDebug: isDebug || args.isDebug || false
-			});
+			mAuth = Helper.initAuthModule(args, manifest, is_debug_logging);
 
 			// Initialize an instance of the updater module
-			mUpdater = new Updater({
-				appVersion: manifest.version,
-				execFileName: 'odenwlan',
-				releaseFileNamePrefix: 'odenwlan-',
-				userAgent: 'odenwlan-node/v' + manifest.version,
-				ghAccountName: 'odentools',
-				ghRepoName: 'odenwlan-node',
-				isDebug: isDebug || args.isDebug || false,
-				isDryRun: isUpdaterDryRun || false,
-				updateCheckInterval: 60 * 60 * 12 * 1000, // 12 hours
-				updateCheckedAt: args.updateCheckedAt || 0,
-				funcSaveUpdateCheckdAt: function(epoch_msec) {
-					Helper.savePref(browserWindows, 'updateCheckedAt', epoch_msec);
-				}
-			});
+			mUpdater = Helper.initUpdaterModule(args, manifest, browserWindows, is_debug_logging, isDevMode);
 
 			// Clear a failed count
 			loginRetryCount = 0;
 		}
+
 	});
+
 	Helper.initPrefWindow(browserWindows);
 	var is_init_load_preferences = false;
+
 	browserWindows.pref.webContents.on('did-finish-load', function() {
+
 		if (!is_init_load_preferences) {
 			is_init_load_preferences = true;
 			browserWindows.pref.webContents.executeJavaScript('sendPreferencesToMainProcess();');
 		}
+
 	});
 
-	// Make a browser for the online detection
+	// Make a worker browser for the online detection
 	ipc.on('online-status-changed', function(event, args) {
 		mLogger.debug('main/IPC.on', 'online-status-changed - ' + args.isOnline);
 		if (isOnline == null || args.isOnline != isOnline) { // Changed to online
@@ -262,6 +210,9 @@ app.on('ready', function() {
 							appTray.setImage(__dirname + '/images/icon_tray_online.png');
 							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
 
+							// Check whether there is newer version and download it
+							Helper.execAutoUpdate(mUpdater);
+
 						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
 
 							mLogger.info('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
@@ -295,9 +246,6 @@ app.on('ready', function() {
 
 						// Processing was done
 						is_processing = false;
-
-						// Check whether there is newer version and download it
-						Helper.execAutoUpdate(mUpdater);
 
 					});
 

@@ -360,7 +360,7 @@ Client.prototype._execTestWANNoProxy = function(callback) {
 			} else if ((res.statusCode == 301 || res.statusCode == 302)
 				&& self._getAuthSubmitBaseUrlByRedirectedUrl(res.headers.location)) { // Redirect
 				self.logger.debug('mc2wifi/_execTestWANNoProxy', 'Redirected to auth page');
-				callback(false, false); // Not logged-in
+				callback(true, false); // Not logged-in
 				return;
 			}
 		}
