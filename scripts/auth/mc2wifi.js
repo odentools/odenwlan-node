@@ -42,32 +42,60 @@ var Client = function(options) {
 **/
 Client.prototype.login = function(callback) {
 
-	var http = require('http');
 	var self = this;
 
-	// 1st request - GET for redirect to authentication-page
+	var request = self._getRequestModule();
+
 	var url = 'http://osakac.ac.jp/';
 	self.logger.debug('mc2wifi/login', 'GET: ' + url);
-	var req = http.get(url, function (res) { // When the 1st request was completed
-		self.logger.debug('mc2wifi/login', 'Response received for GET');
-		if (res.statusCode == 301 || res.statusCode == 302) { // Redirect
-			var redirect_url = res.headers.location;
 
-			// Go to 2nd request - POST for authentication with validation by certificate
-			self._loginSecondRequest(redirect_url, callback);
+	// Get the host name to make a camelized header.
+	// Because transparent proxy expected camelized string to HTTP header name,
+	// but request module will using lower case in default.
+	var req_host = require('url').parse(url).hostname;
 
-		} else if (res.statusCode == 200) { // 1st request was successful; but not redirect
-			callback(false, '1st request was successful; not redirect'); // May be already logged-in
+	// 1st request - GET for redirect to authentication-page
+	self.logger.debug('mc2wifi/login', 'Connect to WAN without proxy...');
+	request({
+		url: url,
+		headers: {
+			'User-Agent': self.userAgent,
+			'Host': req_host // Host header; It must be indicated with camelize case.
+		},
+		timeout: self.timeout,
+		proxy: null,
+		strictSSL: false,
+		followRedirect: false,
+		followAllRedirects: false,
+		rejectUnauthorized: false
+	}, function (err, res, body) {
 
+		if (res) {
+			if (res.statusCode == 301 || res.statusCode == 302) {
+				self.logger.debug('mc2wifi/login', 'Response received for GET');
+				// Go to 2nd request - POST for authentication with validation by certificate
+				var redirect_url = self._getAuthSubmitBaseUrlByRedirectedUrl(res.headers.location);
+				self._loginSecondRequest(redirect_url, callback);
+				return;
+			} else if (res.statusCode == 200) { // 1st request was successful; but not redirect
+				callback(false, '1st request was successful; not redirect'); // May be already logged-in
+				return;
+			} else { // 1st request was failed
+				callback(false, '1st request was failed: ' + res.toString());
+			}
 		} else { // 1st request was failed
 			callback(false, '1st request was failed');
-
 		}
 
-	});
-	req.on('error', function(err) { // Error handling for internal error (g.g, dns error)
-		self.logger.error('mc2wifi/login', 'Internal error occured (ignored): ' + err);
-		callback(false, '1st request was failed');
+	})
+	.on('error', function(err) {
+
+		if (err) {
+			self.logger.error('mc2wifi/login', 'Internal error occured (ignored): ' + err);
+		} else {
+			self.logger.error('mc2wifi/login', 'Internal error occured (ignored)');
+		}
+
 	});
 
 };
@@ -519,10 +547,17 @@ Client.prototype._getHttpModule = function() {
 **/
 Client.prototype._getRequestModule = function() {
 
+	var self = this;
+
 	// Clear a cache of the request module
 	delete require.cache[require.resolve('request')];
+
 	// Return a new instance
-	return require('request');
+	var req = require('request');
+	if (self.isDebug) {
+		req.debug = true;
+	}
+	return req;
 
 };
 
