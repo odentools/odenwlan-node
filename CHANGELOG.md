@@ -1,9 +1,13 @@
-# Change log
+# Change Log
 See also: https://github.com/odentools/odenwlan-node/releases
+
+## v1.4.3 (2015/11/08)
+* Change: The login method of mc2wifi module is now uses http module
+* Change: Replace the request module to custom version
 
 ## v1.4.2
 * Fix: An behavior of update is improved
-*
+* Fix: An malfunction of connection test
 
 ## v1.4.1
 * Fix: Improved debugging logger
