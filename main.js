@@ -192,64 +192,7 @@ app.on('ready', function() {
 					return;
 				}
 
-				if (!login_status) {
-					mLogger.info('main/checkLoop', 'Status: Not logged in :(');
-
-					// Login
-					mLogger.info('main/checkLoop', 'Trying to login (' + loginRetryCount + ')');
-					appTray.setToolTip('odenwlan-node : Trying to login...');
-					mAuth.login(function(is_successful, error_text) {
-
-						if (is_successful) { // Authentication was successful
-
-							mLogger.info('main/checkLoop', 'Authentication result: Successful');
-
-							// Clear the retry count
-							loginRetryCount = 0;
-							// Change the status to online
-							appTray.setImage(__dirname + '/images/icon_tray_online.png');
-							appTray.setToolTip('odenwlan-node : Online (Login was successful)');
-
-							// Check whether there is newer version and download it
-							Helper.execAutoUpdate(mUpdater);
-
-						} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
-
-							mLogger.info('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
-
-							// Don't retry
-							loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
-							// Show a message
-							require('dialog').showMessageBox(null, {
-								type: 'info',
-								title: 'Authenticate was failed',
-								message: 'Authenticate was failed.\nPlease check your MC2-account id and password.',
-								buttons: ['OK']
-							});
-
-						} else { // Other error (e.g. Network error)
-
-							// Show the error message
-							if (error_text != null) {
-								mLogger.info('main/checkLoop', 'Authentication result: Failed - ' + error_text);
-							} else {
-								mLogger.info('main/checkLoop', 'Authentication result: Failed');
-							}
-
-							// Increment the retry count
-							loginRetryCount++;
-							// Change the status to offline
-							appTray.setImage(__dirname + '/images/icon_tray_offline.png');
-							appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
-
-						}
-
-						// Processing was done
-						is_processing = false;
-
-					});
-
-				} else {
+				if (login_status) { // Already online
 					mLogger.info('main/checkLoop', 'Status: Online on any network :)');
 
 					// Clear a failed count
@@ -265,7 +208,65 @@ app.on('ready', function() {
 					// Check whether there is newer version and download it
 					Helper.execAutoUpdate(mUpdater);
 
+					// Done
+					return;
 				}
+
+				mLogger.info('main/checkLoop', 'Status: Not logged in :(');
+
+				// Login
+				mLogger.info('main/checkLoop', 'Trying to login (' + loginRetryCount + ')');
+				appTray.setToolTip('odenwlan-node : Trying to login...');
+				mAuth.login(function(is_successful, error_text) {
+
+					if (is_successful) { // Authentication was successful
+
+						mLogger.info('main/checkLoop', 'Authentication result: Successful');
+
+						// Clear the retry count
+						loginRetryCount = 0;
+						// Change the status to online
+						appTray.setImage(__dirname + '/images/icon_tray_online.png');
+						appTray.setToolTip('odenwlan-node : Online (Login was successful)');
+
+						// Check whether there is newer version and download it
+						Helper.execAutoUpdate(mUpdater);
+
+					} else if (error_text.match(/INVALID_AUTH/)) { // Autentication was failed
+
+						mLogger.info('main/checkLoop', 'Authentication result: Failed; Invalid id or password');
+
+						// Don't retry
+						loginRetryCount = LOGIN_RETRY_COUNT_LIMIT;
+						// Show a message
+						require('dialog').showMessageBox(null, {
+							type: 'info',
+							title: 'Authenticate was failed',
+							message: 'Authenticate was failed.\nPlease check your MC2-account id and password.',
+							buttons: ['OK']
+						});
+
+					} else { // Other error (e.g. Network error)
+
+						// Show the error message
+						if (error_text != null) {
+							mLogger.info('main/checkLoop', 'Authentication result: Failed - ' + error_text);
+						} else {
+							mLogger.info('main/checkLoop', 'Authentication result: Failed');
+						}
+
+						// Increment the retry count
+						loginRetryCount++;
+						// Change the status to offline
+						appTray.setImage(__dirname + '/images/icon_tray_offline.png');
+						appTray.setToolTip('odenwlan-node : Offline (Login was failed)');
+
+					}
+
+					// Processing was done
+					is_processing = false;
+
+				});
 			});
 
 		} catch (e) {
