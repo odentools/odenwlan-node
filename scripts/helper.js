@@ -6,18 +6,19 @@ var BrowserWindow = require('browser-window'), Logger = require('onmem-logger');
 module.exports = {
 
 	/**
-		Initialize the authentication module
+		Initialize the authentication process
 	**/
-	initAuthModule: function(app_preferences, app_manifest, is_debug_logging) {
+	initAuthProcess: function(app_preferences, app_manifest, is_debug_logging) {
 
-		var Wifi = require(__dirname + '/auth/mc2wifi');
-		var auth = new Wifi({
-			username: app_preferences.loginId,
-			password: app_preferences.loginPw,
-			userAgent: 'odenwlan-node/v' + app_manifest.version,
-			isDebug: is_debug_logging
-		});
-		return auth;
+		Logger.getInstance().info('helper/initAuthProcess', 'Initialize the auth process');
+
+		var child_process = require('child_process');
+		return child_process.fork(__dirname + '/process/auth', [
+			app_preferences.loginId,
+			app_preferences.loginPw,
+			'odenwlan-node/v' + app_manifest.version,
+			is_debug_logging
+		]);
 
 	},
 
