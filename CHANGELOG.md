@@ -1,6 +1,9 @@
 # Change Log
 See also: https://github.com/odentools/odenwlan-node/releases
 
+## v1.4.4 (2016/01/20)
+* Change: Separate the authentication module to a child process
+
 ## v1.4.3 (2015/11/08)
 * Change: The login method of mc2wifi module is now uses http module
 * Change: Replace the request module to custom version

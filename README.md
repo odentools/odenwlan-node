@@ -65,7 +65,7 @@ In current version, it makes package for Linux and Windows.
 
 ```
 The MIT License (MIT).
-Copyright (c) 2015 OdenTools Project.
+Copyright (c) 2016 OdenTools Project.
 ```
 
 Please see [LICENSE](https://github.com/odentools/odenwlan-node/blob/master/LICENSE) for details.
