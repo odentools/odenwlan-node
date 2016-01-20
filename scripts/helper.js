@@ -283,6 +283,41 @@ module.exports = {
 	},
 
 	/**
+	 * Applying the auto launch of the startup of computer
+	 */
+	applyAutoLaunch: function(is_enabled) {
+
+		var AutoLaunch = require('auto-launch');
+		var appLauncher = new AutoLaunch({
+			name: 'odenwlan'
+		});
+		appLauncher.isEnabled(function(current_is_enabled){
+
+			if (is_enabled == current_is_enabled) return;
+
+			if (is_enabled) {
+				appLauncher.enable(function(err){
+					if (err) {
+						Logger.getInstance().error('helper/applyAutoLaunch', 'Could not enable the auto launch: ' + err.toString());
+					} else {
+						Logger.getInstance().error('helper/applyAutoLaunch', 'Auto launch has been enabled');
+					}
+				});
+			} else {
+				appLauncher.disable(function(err){
+					if (err) {
+						Logger.getInstance().error('helper/applyAutoLaunch', 'Could not disable the auto launch: ' + err.toString());
+					} else {
+						Logger.getInstance().error('helper/applyAutoLaunch', 'Auto launch has been disabled');
+					}
+				});
+			}
+
+		});
+
+	},
+
+	/**
 		Restart the application
 	**/
 	restartApp: function() {

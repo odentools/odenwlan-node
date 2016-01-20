@@ -221,6 +221,11 @@ app.on('ready', function() {
 				mLogger.debug('main', 'Debug mode is enabled; Preferences: \n' + debug_str);
 			}
 
+			// Applying automatic launch
+			if (!isDevMode) {
+				Helper.applyAutoLaunch(appPreferences.isAutoLaunch || false);
+			}
+
 			// Initialize the authentication process
 			if (appAuthProc != null) appAuthProc.kill('SIGHUP');
 			appAuthProc = Helper.initAuthProcess(appPreferences, mManifest, is_debug_logging);

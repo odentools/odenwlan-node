@@ -17,8 +17,10 @@
 			function readPreferences() {
 				var login_id = localStorage.getItem('loginId');
 				var login_pw = localStorage.getItem('loginPw');
+				var is_auto_launch = localStorage.getItem('isAutoLaunch') || false;
 				document.getElementById('loginId').value = login_id;
 				document.getElementById('loginPw').value = login_pw;
+				document.getElementById('isAutoLaunch').checked = is_auto_launch;
 			}
 
 			/**
@@ -27,12 +29,14 @@
 			function savePreferences() {
 				var login_id = document.getElementById('loginId').value;
 				var login_pw = document.getElementById('loginPw').value;
+				var is_auto_launch = document.getElementById('isAutoLaunch').checked;
 				if (login_id == null || login_pw == null) {
 					window.alert('Login ID or Password is empty!');
 					return;
 				}
 				localStorage.setItem('loginId', login_id);
 				localStorage.setItem('loginPw', login_pw);
+				localStorage.setItem('isAutoLaunch', is_auto_launch);
 
 				sendPreferencesToMainProcess();
 
@@ -84,6 +88,18 @@
 		<div class="container">
 			<h1>Preferences</h1>
 			<form onsubmit="savePreferences(); return false;">
+
+				<h2>General</h2>
+				<div class="form-group">
+					<label for="isAutoLaunchArea">Startup</label>
+					<div id="isAutoLaunchArea" class="checkbox">
+						<label>
+							<input id="isAutoLaunch" type="checkbox">&nbsp;Launch app at startup of computer
+						</label>
+					</div>
+				</div>
+
+				<h2>Account</h2>
 				<div class="form-group">
 					<label for="loginId">MC2 Account ID</label>
 					<input id="loginId" type="text" class="form-control" placeholder="mt15a000">
@@ -92,7 +108,11 @@
 					<label for="loginPw">Password</label>
 					<input id="loginPw" type="password" class="form-control" placeholder="Password of MC2 account">
 				</div>
+
+				<hr/>
+
 				<button type="submit" class="btn btn-primary">Save</button>
+
 			</form>
 		</div>
 	</body>
