@@ -17,7 +17,10 @@
 			function readPreferences() {
 				var login_id = localStorage.getItem('loginId');
 				var login_pw = localStorage.getItem('loginPw');
-				var is_auto_launch = localStorage.getItem('isAutoLaunch') || false;
+				var is_auto_launch = false;
+				if (localStorage.getItem('isAutoLaunch') != null && localStorage.getItem('isAutoLaunch') == 'true') {
+					is_auto_launch = true;
+				}
 				document.getElementById('loginId').value = login_id;
 				document.getElementById('loginPw').value = login_pw;
 				document.getElementById('isAutoLaunch').checked = is_auto_launch;
@@ -29,14 +32,18 @@
 			function savePreferences() {
 				var login_id = document.getElementById('loginId').value;
 				var login_pw = document.getElementById('loginPw').value;
-				var is_auto_launch = document.getElementById('isAutoLaunch').checked;
 				if (login_id == null || login_pw == null) {
 					window.alert('Login ID or Password is empty!');
 					return;
 				}
 				localStorage.setItem('loginId', login_id);
 				localStorage.setItem('loginPw', login_pw);
-				localStorage.setItem('isAutoLaunch', is_auto_launch);
+
+				if (document.getElementById('isAutoLaunch').checked) {
+					localStorage.setItem('isAutoLaunch', 'true');
+				} else {
+					localStorage.setItem('isAutoLaunch', 'false');
+				}
 
 				sendPreferencesToMainProcess();
 

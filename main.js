@@ -223,7 +223,11 @@ app.on('ready', function() {
 
 			// Applying automatic launch
 			if (!isDevMode) {
-				Helper.applyAutoLaunch(appPreferences.isAutoLaunch || false);
+				if (appPreferences.isAutoLaunch != null && appPreferences.isAutoLaunch == 'true') {
+					Helper.applyAutoLaunch(true);
+				} else {
+					Helper.applyAutoLaunch(false);
+				}
 			}
 
 			// Initialize the authentication process

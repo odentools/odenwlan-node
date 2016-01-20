@@ -300,7 +300,7 @@ module.exports = {
 					if (err) {
 						Logger.getInstance().error('helper/applyAutoLaunch', 'Could not enable the auto launch: ' + err.toString());
 					} else {
-						Logger.getInstance().error('helper/applyAutoLaunch', 'Auto launch has been enabled');
+						Logger.getInstance().info('helper/applyAutoLaunch', 'Auto launch has been enabled');
 					}
 				});
 			} else {
@@ -308,7 +308,7 @@ module.exports = {
 					if (err) {
 						Logger.getInstance().error('helper/applyAutoLaunch', 'Could not disable the auto launch: ' + err.toString());
 					} else {
-						Logger.getInstance().error('helper/applyAutoLaunch', 'Auto launch has been disabled');
+						Logger.getInstance().info('helper/applyAutoLaunch', 'Auto launch has been disabled');
 					}
 				});
 			}
