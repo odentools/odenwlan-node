@@ -12,7 +12,7 @@ This project is so experimental yet.
 # Download
 Would you try it now?
 
-Executable binaries for Windows and Linux can be found on the [releases](https://github.com/odentools/odenwlan-node/releases) page.
+Executable binaries for Windows, Linux and Mac OS X can be found on the [releases](https://github.com/odentools/odenwlan-node/releases) page.
 
 # For developers
 
