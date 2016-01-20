@@ -1,6 +1,9 @@
 # Change Log
 See also: https://github.com/odentools/odenwlan-node/releases
 
+## v1.4.5 (2016/01/20)
+* Fix: Login process
+
 ## v1.4.4 (2016/01/20)
 * Change: Separate the authentication module to a child process
 
