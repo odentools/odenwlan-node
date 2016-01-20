@@ -1,6 +1,9 @@
 # Change Log
 See also: https://github.com/odentools/odenwlan-node/releases
 
+## v1.5.0 (2016/01/20)
+* Add: Auto launch at startup of computer
+
 ## v1.4.5 (2016/01/20)
 * Fix: Login process
 

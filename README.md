@@ -7,7 +7,7 @@ This project is so experimental yet.
 ## Works on multi platforms
 * Windows x32/x64
 * Linux x32/x64
-* MacOS (Untested)
+* Mac OS X x32/x64 (Untested)
 
 # Download
 Would you try it now?

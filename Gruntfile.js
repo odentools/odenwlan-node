@@ -30,7 +30,7 @@ module.exports = function(grunt) {
 					version: '0.29.2',
 					platform: 'win32',
 					arch: 'ia32',
-					icon: 'images/icon.png',
+					icon: 'images/icon.ico',
 					overwrite: true,
 					'version-string.CompanyName': '<%= pkg.author %>',
 					'version-string.LegalCopyright': '(C) <%= pkg.author %>',
@@ -38,7 +38,19 @@ module.exports = function(grunt) {
 					'version-string.ProductVersion': '<%= pkg.version %>',
 					'version-string.FileDescription': '<%= pkg.description %>',
 					'version-string.FileVersion': '<%= grunt.template.today("yyyymmdd") %>'
-
+				}
+			},
+			osx: {
+				options: {
+					name: 'odenwlan',
+					dir: '.',
+					out: 'dists',
+					ignore: '(dists/|node_modules/grunt.*|\.git.*|Gruntfile\.js)',
+					version: '0.29.2',
+					platform: 'darwin',
+					arch: 'x64',
+					icon: 'images/icon.icns',
+					overwrite: true
 				}
 			}
 		},
