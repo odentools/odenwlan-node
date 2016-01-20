@@ -13,12 +13,14 @@ module.exports = {
 		Logger.getInstance().info('helper/initAuthProcess', 'Initialize the auth process');
 
 		var child_process = require('child_process');
-		return child_process.fork(__dirname + '/process/auth', [
-			app_preferences.loginId,
-			app_preferences.loginPw,
-			'odenwlan-node/v' + app_manifest.version,
-			is_debug_logging
-		]);
+		return child_process.fork(__dirname + '/process/auth', [], {
+			env: {
+				LOGIN_ID: app_preferences.loginId,
+				LOGIN_PW: app_preferences.loginPw,
+				USER_AGENT: 'odenwlan-node/v' + app_manifest.version,
+				DEBUG_LOGGING: is_debug_logging
+			}
+		});
 
 	},
 

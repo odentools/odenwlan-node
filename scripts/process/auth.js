@@ -3,10 +3,10 @@
  */
 
 // Get the arguments
-var login_id = process.argv[0],
-	login_pw = process.argv[1],
-	user_agent = process.argv[2],
-	is_debug = process.argv[3] || false;
+var login_id = process.env.LOGIN_ID,
+	login_pw = process.env.LOGIN_PW,
+	user_agent = process.env.USER_AGENT,
+	is_debug = process.env.DEBUG_LOGGING || false;
 
 // Initialize the authentication modules
 // TODO: For now, supported only one module.
@@ -40,7 +40,7 @@ process.on('message', function (msg) {
 				process.send({
 					cmd: msg.cmd,
 					loginStatus: status,
-					error: null
+					errorText: null
 				});
 			});
 		}
@@ -48,14 +48,10 @@ process.on('message', function (msg) {
 		for (module_name in mAuthModules) {
 			mAuthModules[module_name].login(function (is_successful, error_text) {
 				// Send a response to the main process
-				var err = null;
-				if (error_text != null) {
-					err = new Error(error_text);
-				}
 				process.send({
 					cmd: msg.cmd,
 					isSuccessful: is_successful,
-					error: err
+					errorText: error_text
 				});
 			});
 		}

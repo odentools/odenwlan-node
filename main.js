@@ -91,8 +91,8 @@ app.on('ready', function() {
 
 				if (msg.cmd == 'checkLoginStatus') { // Response of checkLoginStatus command
 
-					if (msg.error != null) {
-						mLogger.debug('main/checkLoop', msg.error.toString());
+					if (msg.errorText != null) {
+						mLogger.debug('main/checkLoop', msg.errorText);
 						isProcessing = false;
 						return;
 					}
@@ -134,10 +134,7 @@ app.on('ready', function() {
 				} else if (msg.cmd == 'login') { // Response of login command
 
 					var is_successful = msg.isSuccessful || false;
-					var error_text = null;
-					if (msg.error != null) {
-						error_text = msg.error.toString();
-					}
+					var error_text = msg.errorText || null;
 
 					if (is_successful) { // Authentication was successful
 
@@ -269,6 +266,23 @@ app.on('ready', function() {
 		isOnline = args.isOnline;
 	});
 	Helper.initWorkerBrowser(browserWindows);
+
+	// Monitor the resume from resume
+	/*require('power-monitor').on('resume', function () {
+
+		mLogger.info('main', 'Resume from suspend state');
+		if (appPreferences != null) {
+			// Set a now time to the connection changed time
+			conChangedAt = new Date().getTime();
+			// Clear a failed count
+			loginRetryCount = 0;
+			// Initialize the authentication process
+			var is_debug_logging = isDevMode || appPreferences.isDebug || false;
+			if (appAuthProc != null) appAuthProc.kill('SIGHUP');
+			appAuthProc = Helper.initAuthProcess(appPreferences, mManifest, is_debug_logging);
+			initAuthProcessReceivers();
+
+	});*/
 
 	// Start a timer for the status checking
 	setInterval(function(){

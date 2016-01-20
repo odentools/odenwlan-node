@@ -123,14 +123,14 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	// Set a certificate for validate the authentication page
 	var cert = null;
 	if (self.isCertCheck && cert_file != null) {
-		self.logger.debug('mc2wifi/login', 'Load certificate: ' + cert_file);
+		self.logger.debug('mc2wifi/_loginSecondRequest', 'Load certificate: ' + cert_file);
 		cert = require('fs').readFileSync(path.resolve(__dirname, '../../certs/' + cert_file));
 	} else {
-		self.logger.debug('mc2wifi/login', 'Not load certificate');
+		self.logger.debug('mc2wifi/_loginSecondRequest', 'Not load certificate');
 	}
 
 	// 2nd request - POST for authentication with validation by certificate
-	self.logger.debug('mc2wifi/login', 'POST: ' + base_url + '/login');
+	self.logger.debug('mc2wifi/_loginSecondRequest', 'POST: ' + base_url + '/login');
 	var request = self._getRequestModule();
 	request({
 		method: 'POST',
@@ -148,11 +148,11 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 	}, function(err, res, body) { // When the 2st request was completed
 
 		var redirect_url = null;
-		self.logger.debug('mc2wifi/login', 'Response received for POST');
+		self.logger.debug('mc2wifi/_loginSecondRequest', 'Response received for POST');
 
 		if (!err && (res.statusCode == 301 || res.statusCode == 302)) { // HTTP Redirect
 			redirect_url = res.headers.location;
-			self.logger.debug('mc2wifi/login', 'Detect HTTP Redirect: ' + redirect_url);
+			self.logger.debug('mc2wifi/_loginSecondRequest', 'Detect HTTP Redirect: ' + redirect_url);
 
 			// Go to 3rd request - Redirect-loop after authentication
 			self._requestRedirectLoop(redirect_url, base_url, callback, 0);
@@ -162,7 +162,9 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 			self._requestIncludeResources(body, base_url);
 			// Processing JavaScript code
 			redirect_url = self._getJsRedirectUrl(body, base_url);
-			if (redirect_url != null) {
+			if (redirect_url != null && redirect_url.match(/auth\=failed/)) {
+				callback(false, 'INVALID_AUTH');
+			} else if (redirect_url != null) {
 				// Go to 3rd request - Redirect-loop after authentication
 				self._requestRedirectLoop(redirect_url, base_url, callback, 0);
 			} else {
@@ -171,7 +173,7 @@ Client.prototype._loginSecondRequest = function(url, callback) {
 			}
 
 		} else { // 2nd request was failed
-			callback(false, '2nd request was failed: ' + err);
+			callback(false, '2nd request was failed: ' + res.statusCode);
 		}
 
 	});
@@ -257,6 +259,10 @@ Client.prototype._requestIncludeResources = function(body, base_url) {
 
 	if (img_url == null) {
 		return;
+	}
+
+	if (!img_url.match(/^(http|https):\/\/.*/) && !img_url.match(/^\/.*/)) {
+		img_url = '/' + img_url;
 	}
 
 	self.logger.debug('mc2wifi/_requestIncludeResources', 'IMG GET: ' + img_url);
@@ -554,9 +560,7 @@ Client.prototype._getRequestModule = function() {
 
 	// Return a new instance
 	var req = require('request');
-	if (self.isDebug) {
-		req.debug = true;
-	}
+	if (self.isDebug) req.debug = false; // Logging of Request module
 	return req;
 
 };
